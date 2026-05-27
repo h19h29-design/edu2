@@ -1,13 +1,11 @@
 import { ArrowRight, BookOpen, CheckCircle2, FlaskConical, MonitorPlay, NotebookText, ShieldCheck, Wand2 } from "lucide-react";
 import { motion } from "motion/react";
 import DeckShell from "./components/DeckShell";
-import LearningVisual from "./components/LearningVisual";
 import DemoPage from "./pages/DemoPage";
 import GlossaryPage from "./pages/GlossaryPage";
 import PromptLabPage from "./pages/PromptLabPage";
 import SlideMode from "./pages/SlideMode";
 import StudyMode from "./pages/StudyMode";
-import { homeVisual, slideVisuals } from "./data/slideVisuals";
 
 const quickLinks = [
   { href: "/slide", label: "발표 시작", icon: MonitorPlay, desc: "전체화면 발표와 키보드 조작" },
@@ -15,8 +13,6 @@ const quickLinks = [
   { href: "/glossary", label: "용어집", icon: NotebookText, desc: "행정업무 비유로 이해" },
   { href: "/demo", label: "실습 데모", icon: FlaskConical, desc: "질문·투표 보드 실행" },
 ];
-
-const previewVisualIds = ["codex-why", "terms-map", "github", "security"];
 
 function HomePage() {
   return (
@@ -47,7 +43,6 @@ function HomePage() {
               </div>
             </div>
             <div className="grid gap-3">
-              <LearningVisual visual={homeVisual} variant="hero" />
               {[
                 { title: "PPT 흐름 기반", desc: "원본 20장 흐름에 신규 3.5/14.5 슬라이드를 더했습니다.", icon: CheckCircle2 },
                 { title: "AI 개발팀 시뮬레이션", desc: "발표 모드에서 에이전트 상태와 코딩 장면을 보여줍니다.", icon: Wand2 },
@@ -83,24 +78,6 @@ function HomePage() {
               </motion.a>
             );
           })}
-        </section>
-
-        <section className="glass-card rounded-[34px] p-6">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-2xl font-black text-slate-950">이미지로 먼저 보는 핵심 장면</p>
-              <p className="mt-1 text-sm font-bold text-slate-500">슬라이드마다 그림을 붙여 초보자도 흐름을 먼저 잡을 수 있게 했습니다.</p>
-            </div>
-            <a href="/study" className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-violet-700 shadow-sm">
-              전체 이미지 보기
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {previewVisualIds.map((id) => (
-              <LearningVisual key={id} visual={slideVisuals[id]} variant="study" />
-            ))}
-          </div>
         </section>
       </div>
     </DeckShell>
