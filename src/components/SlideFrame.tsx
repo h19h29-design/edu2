@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { glossary, glossaryCategoryOrder, glossaryCategoryStyles } from "../data/glossary";
 import { schoolTools } from "../data/schoolTools";
 import type { Slide } from "../data/slides";
+import { slideVisuals } from "../data/slideVisuals";
 import AgentCallSequence from "./AgentCallSequence";
 import ApiFlow from "./ApiFlow";
 import CliCodingAnimation from "./CliCodingAnimation";
@@ -18,6 +19,7 @@ import TrainingQuestionBoard from "./TrainingQuestionBoard";
 import VercelDeployAnimation from "./VercelDeployAnimation";
 import WorktreeSimulation from "./WorktreeSimulation";
 import ClosingTechLeadAnimation from "./ClosingTechLeadAnimation";
+import LearningVisual from "./LearningVisual";
 
 type SlideFrameProps = {
   slide: Slide;
@@ -428,6 +430,8 @@ function renderAnimation(slide: Slide) {
 }
 
 export default function SlideFrame({ slide, dense = false }: SlideFrameProps) {
+  const visual = slideVisuals[slide.id];
+
   return (
     <section className="space-y-5">
       <motion.div key={slide.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
@@ -437,9 +441,12 @@ export default function SlideFrame({ slide, dense = false }: SlideFrameProps) {
         </div>
         <h1 className={dense ? "mt-4 whitespace-pre-line text-4xl font-black tracking-normal text-slate-950 xl:text-6xl" : "mt-5 whitespace-pre-line text-3xl font-black tracking-normal text-slate-950 md:text-5xl"}>{slide.title}</h1>
         {slide.subtitle ? <p className="mt-3 text-xl font-bold leading-8 text-slate-700 md:text-2xl">{slide.subtitle}</p> : null}
-        <div className="mt-4 rounded-[24px] border border-violet-200 bg-white/80 px-5 py-4 text-lg font-black leading-8 text-violet-900 shadow-sm">
-          <Lightbulb className="mr-2 inline h-5 w-5 text-violet-600" />
-          {slide.coreMessage}
+        <div className={`mt-4 grid gap-3 ${visual ? "xl:grid-cols-[220px_1fr]" : ""}`}>
+          {visual ? <LearningVisual visual={visual} /> : null}
+          <div className="rounded-[24px] border border-violet-200 bg-white/80 px-5 py-4 text-lg font-black leading-8 text-violet-900 shadow-sm">
+            <Lightbulb className="mr-2 inline h-5 w-5 text-violet-600" />
+            {slide.coreMessage}
+          </div>
         </div>
       </motion.div>
       <div>{renderAnimation(slide)}</div>
