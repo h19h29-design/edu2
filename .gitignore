@@ -1,0 +1,11 @@
+node_modules/
+dist/
+output/
+.playwright-mcp/
+tmp/
+*.log
+*.png
+*.zip
+.env
+.env.local
+.DS_Store
