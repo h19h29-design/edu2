@@ -1,0 +1,2 @@
+source=/volume1/data-all/프로그램/강의홈피/2/codex_vibe_harness_html_webapp_deployable.zip
+deployed_at=2026-05-23T10:43:15+09:00

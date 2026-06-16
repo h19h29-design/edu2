@@ -1,0 +1,17 @@
+.DS_Store
+Thumbs.db
+
+# Local/runtime files
+.env
+.env.*
+!.env.example
+.local/
+logs/
+*.log
+
+# NAS/predeploy backups
+_predeploy_backups/
+predeploy-backups/
+*.bak
+*.tmp
+
