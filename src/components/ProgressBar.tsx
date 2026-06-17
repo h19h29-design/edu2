@@ -11,9 +11,9 @@ export default function ProgressBar({ value, label, className }: ProgressBarProp
   return (
     <div className={clsx("flex items-center gap-3", className)}>
       {label ? <span className="text-sm font-semibold text-slate-600">{label}</span> : null}
-      <div className="h-3 flex-1 overflow-hidden rounded-full bg-violet-100">
+      <div className="h-3 flex-1 overflow-hidden rounded-full bg-slate-200">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 shadow-[0_0_18px_rgba(124,58,237,0.45)] transition-all duration-500"
+          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 transition-all duration-500"
           style={{ width: `${safe}%` }}
         />
       </div>

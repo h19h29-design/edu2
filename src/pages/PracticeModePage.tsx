@@ -1,10 +1,55 @@
 import { BookOpenCheck, Download, ExternalLink, ImageDown, LayoutPanelTop, MonitorPlay } from "lucide-react";
 import DeckShell from "../components/DeckShell";
 import {
+  COMMUNITY_PRACTICE_HTML_FILE_NAME,
   COMMUNITY_PRACTICE_HTML_PATH,
+  COMMUNITY_PRACTICE_IFRAME_TITLE,
   COMMUNITY_PRACTICE_IMAGE_DOWNLOAD_NAME,
   COMMUNITY_PRACTICE_IMAGE_PATH,
 } from "../lib/practiceAssets";
+
+type PracticeAction = {
+  href: string;
+  label: string;
+  icon: typeof ExternalLink;
+  className: string;
+  download?: string;
+  rel?: string;
+  target?: "_blank";
+};
+
+// These arrays keep the page editable for future lecture-material swaps.
+// To add/remove CTA buttons or guide bullets, edit the objects below first.
+const practiceActions: PracticeAction[] = [
+  {
+    href: COMMUNITY_PRACTICE_HTML_PATH,
+    label: "새 창으로 열기",
+    icon: ExternalLink,
+    className: "bg-slate-950",
+    target: "_blank",
+    rel: "noreferrer",
+  },
+  {
+    href: COMMUNITY_PRACTICE_HTML_PATH,
+    label: "HTML 다운로드",
+    icon: Download,
+    className: "bg-blue-600",
+    download: COMMUNITY_PRACTICE_HTML_FILE_NAME,
+  },
+  {
+    href: COMMUNITY_PRACTICE_IMAGE_PATH,
+    label: "이미지 다운로드",
+    icon: ImageDown,
+    className: "bg-emerald-500",
+    download: COMMUNITY_PRACTICE_IMAGE_DOWNLOAD_NAME,
+  },
+];
+
+const practiceTips = [
+  "방향키, Space, Home, End로 단계 페이지처럼 넘길 수 있습니다.",
+  "전체화면 모드는 실습 HTML 안에서 별도로 동작합니다.",
+  "실습 HTML 자체를 바꾸려면 public/practice 파일과 practiceAssets 상수를 함께 수정하면 됩니다.",
+] as const;
 
 export default function PracticeModePage() {
   return (
@@ -17,36 +62,20 @@ export default function PracticeModePage() {
                 <MonitorPlay className="h-6 w-6" />
               </div>
               <p className="text-3xl font-black text-slate-950">독서커뮤니티 실습 모드</p>
-              <p className="mt-3 max-w-3xl text-sm font-bold leading-6 text-slate-600">
-                첨부한 독서커뮤니티 실습 HTML을 그대로 실행합니다. iframe 안에서 <strong>1015</strong>를 누르면 프롬프트 수정 버튼이 열리고,
-                저장한 내용은 브라우저 localStorage에 유지됩니다.
-              </p>
               <div className="mt-5 flex flex-wrap gap-3">
-                <a
-                  href={COMMUNITY_PRACTICE_HTML_PATH}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-card"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  새 창으로 열기
-                </a>
-                <a
-                  href={COMMUNITY_PRACTICE_HTML_PATH}
-                  download="reading-community-codex-practice-5-4mini.html"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-card"
-                >
-                  <Download className="h-4 w-4" />
-                  HTML 다운로드
-                </a>
-                <a
-                  href={COMMUNITY_PRACTICE_IMAGE_PATH}
-                  download={COMMUNITY_PRACTICE_IMAGE_DOWNLOAD_NAME}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-white shadow-card"
-                >
-                  <ImageDown className="h-4 w-4" />
-                  이미지 다운로드
-                </a>
+                {practiceActions.map(({ href, label, icon: Icon, className, download, rel, target }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target={target}
+                    rel={rel}
+                    download={download}
+                    className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white shadow-card ${className}`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </a>
+                ))}
               </div>
             </div>
             <div className="rounded-[28px] border border-white/70 bg-white/80 p-4 shadow-card">
@@ -55,8 +84,9 @@ export default function PracticeModePage() {
                 실습모드 안내
               </div>
               <ul className="space-y-3 text-sm font-bold leading-6 text-slate-600">
-                <li>방향키, Space, Home, End로 단계 페이지처럼 넘길 수 있습니다.</li>
-                <li>전체화면 모드는 실습 HTML 안에서 별도로 동작합니다.</li>
+                {practiceTips.map((tip) => (
+                  <li key={tip}>{tip}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -76,18 +106,24 @@ export default function PracticeModePage() {
                 <br />
                 실습 자료
               </p>
-              <p className="mt-2 text-sm font-bold leading-6 text-slate-600">
-                강의용 커뮤니티 허브와 분리해 두어서 실습 자료의 단축키, 편집 저장, 다운로드 기능이 충돌 없이 유지됩니다.
-              </p>
             </div>
           </div>
           <div className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-card">
             <iframe
-              title="독서커뮤니티 실습 모드"
+              title={COMMUNITY_PRACTICE_IFRAME_TITLE}
               src={COMMUNITY_PRACTICE_HTML_PATH}
               className="h-[820px] w-full bg-white"
+              loading="lazy"
               allowFullScreen
             />
+          </div>
+          <div className="mt-4 rounded-[24px] border border-dashed border-slate-300 bg-slate-50/90 p-4 text-sm font-bold leading-6 text-slate-600">
+            <p className="text-slate-900">빠른 수정 포인트</p>
+            <p className="mt-1">
+              화면 문구와 버튼 구성은 <code>PracticeModePage.tsx</code>에서, 실제 실습 자료 파일명은 <code>practiceAssets.ts</code>와
+              <code className="ml-1 rounded bg-white px-1.5 py-0.5 text-xs font-black text-slate-700">public/practice</code>
+              폴더에서 같이 맞추면 됩니다.
+            </p>
           </div>
         </section>
       </div>

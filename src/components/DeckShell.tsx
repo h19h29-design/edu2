@@ -72,7 +72,7 @@ export default function DeckShell({ children, progress = 0, mode = "home", botto
         </div>
       </header>
       <main className={clsx("mx-auto max-w-[1720px] px-4 py-5", className)}>{children}</main>
-      <footer className="sticky bottom-0 z-30 border-t border-slate-200/70 bg-white/82 px-4 py-3 backdrop-blur-2xl">
+      <footer className="sticky bottom-0 z-30 border-t border-slate-200 bg-white px-4 py-3">
         <div className="mx-auto flex max-w-[1720px] flex-col gap-3 lg:flex-row lg:items-center">
           <ProgressBar value={progress} label="학습 진행률" className="min-w-[280px] flex-1" />
           {bottom ?? (

@@ -1,5 +1,6 @@
-import { ArrowRight, BookOpenCheck, ClipboardList, ExternalLink, MessageSquareText, Presentation, UserRound } from "lucide-react";
+import { ArrowRight, BookOpenCheck, ClipboardList, ExternalLink, MessageSquareText, Presentation, UserRound, VenetianMask } from "lucide-react";
 import DeckShell from "../components/DeckShell";
+import TrainingAnnouncementBoard from "../components/TrainingAnnouncementBoard";
 import TrainingIntroBoard from "../components/TrainingIntroBoard";
 import TrainingQuestionBoard from "../components/TrainingQuestionBoard";
 
@@ -13,9 +14,9 @@ export default function DemoPage() {
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
                 <ClipboardList className="h-6 w-6" />
               </div>
-              <p className="text-2xl font-black text-slate-950">독서커뮤니티 허브</p>
+              <p className="text-2xl font-black text-slate-950">커뮤니티 허브</p>
               <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-slate-600">
-                기존 실습 데모 진입 페이지를 커뮤니티 허브로 바꿨습니다. 질문 보드, 자기소개 보드, 프롬프트 메모판을 먼저 둘러보고, 옆 버튼으로 실습 모드 화면까지 바로 들어갈 수 있습니다.
+                질문 보드, 전달용 게시판, 자기소개 보드, 프롬프트 메모판을 한 화면에서 둘러보고 필요할 때 실습 모드로 넘어갈 수 있습니다.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -29,7 +30,7 @@ export default function DemoPage() {
               </a>
             </div>
           </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
             <a href="/practice-mode" className="rounded-[24px] border border-amber-200 bg-amber-50/80 p-4 transition hover:-translate-y-1">
               <BookOpenCheck className="mb-3 h-6 w-6 text-amber-600" />
               <p className="font-black text-slate-950">실습 모드</p>
@@ -39,6 +40,11 @@ export default function DemoPage() {
               <ClipboardList className="mb-3 h-6 w-6 text-violet-600" />
               <p className="font-black text-slate-950">프롬프트 메모판</p>
               <p className="mt-1 text-sm font-bold leading-6 text-slate-500">강의용 프롬프트를 펼쳐 보고 복사합니다.</p>
+            </a>
+            <a href="#announcement-board" className="rounded-[24px] border border-slate-300 bg-slate-50/90 p-4 transition hover:-translate-y-1">
+              <VenetianMask className="mb-3 h-6 w-6 text-slate-700" />
+              <p className="font-black text-slate-950">전달용 게시판</p>
+              <p className="mt-1 text-sm font-bold leading-6 text-slate-500">강의자가 칠판처럼 문장과 이미지를 띄우고 지울 수 있습니다.</p>
             </a>
             <a href="#community-sections" className="rounded-[24px] border border-blue-200 bg-blue-50/80 p-4 transition hover:-translate-y-1">
               <MessageSquareText className="mb-3 h-6 w-6 text-blue-600" />
@@ -88,6 +94,8 @@ export default function DemoPage() {
             </div>
           </div>
         </section>
+
+        <TrainingAnnouncementBoard />
 
         <section id="question-board">
           <TrainingQuestionBoard />
