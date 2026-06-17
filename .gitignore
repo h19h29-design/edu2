@@ -9,3 +9,4 @@ tmp/
 .env
 .env.local
 .DS_Store
+!public/practice/reading-community-app-preview.png

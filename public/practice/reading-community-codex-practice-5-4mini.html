@@ -1,0 +1,798 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>독서커뮤니티 웹앱 개발 실습 자료</title>
+<style>
+:root{--bg:#f4fbf8;--ink:#123047;--muted:#64748b;--card:#fff;--mint:#34d399;--blue:#2563eb;--line:#dbeafe;--dark:#0f172a;--shadow:0 16px 40px rgba(15,23,42,.10)}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 5%,#bbf7d0 0,transparent 26%),radial-gradient(circle at 90% 0,#bfdbfe 0,transparent 30%),linear-gradient(180deg,#fbfffd,#eef7ff)}
+.wrap{max-width:1180px;margin:auto;padding:28px 20px 70px}
+.hero{background:linear-gradient(135deg,#0f2a43,#1e40af);color:white;border-radius:34px;padding:46px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+.hero:after{content:"";position:absolute;right:-80px;top:-80px;width:360px;height:360px;background:rgba(52,211,153,.28);border-radius:50%}
+.hero>*{position:relative;z-index:1} .badge{display:inline-flex;padding:9px 14px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.12);font-weight:900}
+h1{font-size:clamp(36px,5vw,62px);line-height:1.05;margin:18px 0;letter-spacing:-.05em} .hero p{font-size:19px;line-height:1.7;color:rgba(255,255,255,.86);max-width:820px}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0 26px} .quick div{background:#fff;border:1px solid rgba(148,163,184,.25);border-radius:22px;padding:18px;box-shadow:0 10px 28px rgba(15,23,42,.06)} .quick b{display:block;color:var(--muted);font-size:13px;margin-bottom:7px} .quick span{font-size:19px;font-weight:1000}
+.layout{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start} nav{position:sticky;top:18px;background:rgba(255,255,255,.85);backdrop-filter:blur(14px);border:1px solid rgba(148,163,184,.25);border-radius:26px;padding:16px;box-shadow:var(--shadow)} nav h3{font-size:14px;color:var(--muted);margin:0 0 10px} nav a{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink);font-weight:900;padding:10px;border-radius:15px} nav a:hover{background:#ecfeff} .dot{width:26px;height:26px;border-radius:10px;background:#dbeafe;color:#1d4ed8;display:flex;align-items:center;justify-content:center;font-size:12px}
+.section,.stage{background:var(--card);border:1px solid rgba(148,163,184,.25);border-radius:30px;padding:26px;margin-bottom:24px;box-shadow:var(--shadow)} .section h2{font-size:30px;margin:0 0 10px;letter-spacing:-.04em} .section p{color:var(--muted);line-height:1.7} .concept{display:grid;grid-template-columns:repeat(4,1fr);gap:14px} .concept div{border:1px solid #e2e8f0;border-radius:22px;padding:18px;background:#f8fafc} .concept i{font-style:normal;font-size:30px} .concept h3{margin:8px 0} .concept p{font-size:14px;margin:0}
+table{width:100%;border-collapse:collapse;background:#fff;min-width:760px} .table{overflow:auto;border:1px solid #e2e8f0;border-radius:18px} th,td{padding:14px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top;font-size:14px} th{background:#f8fafc;color:#334155} tr:last-child td{border-bottom:0}
+.stage{overflow:hidden;position:relative} .stage:before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--mint),#60a5fa,#f9a8d4)} .stage-title{display:flex;gap:18px;margin-bottom:18px} .num{width:58px;height:58px;border-radius:20px;background:linear-gradient(135deg,#34d399,#60a5fa);color:white;font-size:26px;font-weight:1000;display:flex;align-items:center;justify-content:center;flex:0 0 auto} .stage small{color:var(--blue);font-weight:1000;text-transform:uppercase} .stage h2{margin:2px 0;font-size:30px;letter-spacing:-.05em} .stage-title p{margin:6px 0 0;color:var(--muted);line-height:1.6}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0} .chips div{padding:16px;border-radius:22px;border:1px solid #e2e8f0;background:#f8fafc} .chips div:first-child{background:#f0fdf4;border-color:#bbf7d0} .chips div:last-child{background:#eff6ff;border-color:#bfdbfe} .chips b{display:block;margin-bottom:6px} .chips span{color:#475569;line-height:1.5}.link-row{display:flex;flex-wrap:wrap;gap:8px}.link-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#2563eb;color:white;border-radius:14px;padding:10px 13px;font-size:14px;font-weight:1000;line-height:1.2}.link-button.secondary{background:#0f172a}
+.todo{background:#fff7ed;border:1px solid #fed7aa;border-radius:24px;padding:20px;margin-bottom:18px} .todo h3{margin:0 0 12px} .todo ol{margin:0;padding-left:22px;line-height:1.85}
+.prompt{background:#0f172a;border-radius:26px;overflow:hidden;box-shadow:0 16px 36px rgba(15,23,42,.16)} .prompt-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;background:#111827;color:white} .prompt-head span{display:inline-block;background:rgba(52,211,153,.16);border:1px solid rgba(52,211,153,.35);color:#bbf7d0;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;margin-right:8px} .prompt-head b{font-size:16px}.prompt-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px} button{border:0;border-radius:14px;background:#34d399;color:#052e16;padding:11px 16px;font-weight:1000;cursor:pointer}.edit-btn{display:none;background:#bfdbfe;color:#0f172a}.editing-enabled .edit-btn{display:inline-flex}.save-btn{background:#60a5fa;color:#082f49}.cancel-btn{background:#e2e8f0;color:#0f172a} pre{margin:0;padding:22px;max-height:560px;overflow:auto;color:#d1fae5;font-size:13px;line-height:1.65;white-space:pre-wrap;font-family:Consolas,"D2Coding",monospace}.prompt-editor{display:block;width:100%;min-height:460px;border:0;border-top:1px solid rgba(148,163,184,.25);background:#08111f;color:#d1fae5;padding:22px;font-size:13px;line-height:1.65;font-family:Consolas,"D2Coding",monospace;resize:vertical;outline:none}
+.footer{background:#0f2a43;color:white;border-radius:30px;padding:26px;box-shadow:var(--shadow)} .footer p{line-height:1.7;color:rgba(255,255,255,.85)} .toast{position:fixed;right:20px;bottom:20px;background:#0f172a;color:white;padding:13px 16px;border-radius:16px;opacity:0;transform:translateY(8px);transition:.25s;box-shadow:var(--shadow);z-index:9} .toast.show{opacity:1;transform:translateY(0)}
+::selection{background:#bbf7d0;color:#0f172a} body{background-color:#eef7ff;background-image:linear-gradient(115deg,rgba(219,234,254,.78),rgba(240,253,244,.72) 42%,rgba(255,247,237,.62)),linear-gradient(rgba(15,23,42,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(15,23,42,.032) 1px,transparent 1px);background-size:auto,42px 42px,42px 42px;background-attachment:fixed}.hero{isolation:isolate;background:linear-gradient(135deg,#123047 0%,#1d4ed8 58%,#0f766e 100%);border:1px solid rgba(255,255,255,.22);box-shadow:0 26px 70px rgba(15,23,42,.22),inset 0 1px 0 rgba(255,255,255,.2)}.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.16),transparent 38%),repeating-linear-gradient(135deg,rgba(255,255,255,.08) 0 1px,transparent 1px 18px);opacity:.8}.hero:after{right:38px;top:34px;width:210px;height:210px;border-radius:26px;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(52,211,153,.18));border:1px solid rgba(255,255,255,.25);box-shadow:0 18px 40px rgba(3,7,18,.18);transform:rotate(12deg)}.badge{box-shadow:inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(10px)}.quick div,.section,.stage,nav{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}.quick div:hover,.concept div:hover{transform:translateY(-4px);box-shadow:0 18px 42px rgba(15,23,42,.12);border-color:#93c5fd}.section,.stage{box-shadow:0 18px 50px rgba(15,23,42,.09),0 1px 0 rgba(255,255,255,.8) inset}.stage:hover{transform:translateY(-2px);box-shadow:0 24px 58px rgba(15,23,42,.13)}.stage:before{height:7px;background:linear-gradient(90deg,#34d399,#60a5fa,#f9a8d4,#fbbf24)}.num{box-shadow:0 14px 28px rgba(37,99,235,.25),inset 0 1px 0 rgba(255,255,255,.35)}nav a{transition:background .18s ease,color .18s ease,transform .18s ease}nav a:hover{background:linear-gradient(90deg,#ecfeff,#eff6ff);color:#1d4ed8;transform:translateX(3px)}.dot{box-shadow:inset 0 1px 0 rgba(255,255,255,.65)}.concept div{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;background:linear-gradient(180deg,#ffffff,#f8fafc)}.concept i{display:inline-flex;width:42px;height:42px;align-items:center;justify-content:center;border-radius:16px;background:#eff6ff}.chips div{box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}.todo{position:relative;background:linear-gradient(180deg,#fff7ed,#fffaf4);box-shadow:inset 4px 0 0 #f59e0b}.link-button,button{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.link-button:hover,button:hover{transform:translateY(-1px);filter:saturate(1.06);box-shadow:0 10px 22px rgba(37,99,235,.2)}.prompt{border:1px solid rgba(148,163,184,.28);box-shadow:0 22px 54px rgba(15,23,42,.18)}.prompt-head{background:linear-gradient(90deg,#0f172a,#172554)}pre{background:linear-gradient(180deg,#111827,#0f172a);border-top:1px solid rgba(148,163,184,.22)}pre::-webkit-scrollbar,.table::-webkit-scrollbar{height:10px;width:10px}pre::-webkit-scrollbar-thumb,.table::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:999px}tbody tr{transition:background .16s ease}tbody tr:hover{background:#f8fafc}.toast{border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px rgba(15,23,42,.2)}
+@media(prefers-reduced-motion:no-preference){.hero{animation:heroIn .55s ease both}.quick div,.section,.stage{animation:riseIn .5s ease both}.quick div:nth-child(2){animation-delay:.05s}.quick div:nth-child(3){animation-delay:.1s}.quick div:nth-child(4){animation-delay:.15s}.stage:nth-of-type(2){animation-delay:.04s}.stage:nth-of-type(3){animation-delay:.08s}.stage:nth-of-type(4){animation-delay:.12s}@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes heroIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,430px);gap:30px;align-items:center}.hero-copy{min-width:0}.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.presentation-toggle{background:#fbbf24;color:#422006;box-shadow:0 14px 28px rgba(251,191,36,.22)}.hero-visual{display:block;position:relative;overflow:hidden;border-radius:28px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.13);box-shadow:0 24px 58px rgba(3,7,18,.28);text-decoration:none;aspect-ratio:4/3;transform:rotate(1deg)}.hero-visual img{width:100%;height:100%;display:block;object-fit:cover;object-position:top center}.hero-visual span{position:absolute;left:16px;right:16px;bottom:14px;display:flex;justify-content:center;border-radius:999px;background:rgba(15,23,42,.72);color:#fff;padding:9px 12px;font-size:13px;font-weight:900;backdrop-filter:blur(10px)}.hero-visual:hover{transform:translateY(-4px) rotate(0);box-shadow:0 30px 70px rgba(3,7,18,.34)}.presentation-ui{display:none}.presentation-mode{overflow:hidden}.presentation-mode .wrap{max-width:none;height:100vh;padding:24px;display:flex;align-items:center;justify-content:center}.presentation-mode .hero,.presentation-mode .quick,.presentation-mode nav,.presentation-mode main>.section{display:none}.presentation-mode .layout{display:block;width:100%;height:100%}.presentation-mode main{height:100%;display:grid;place-items:center}.presentation-mode .stage{display:none;width:min(1180px,calc(100vw - 72px));height:min(820px,calc(100vh - 108px));margin:0;overflow:auto;padding:clamp(24px,4vw,52px);border-radius:30px;background:rgba(255,255,255,.96);box-shadow:0 34px 90px rgba(3,7,18,.28)}.presentation-mode .stage.active-slide{display:block}.presentation-mode .stage h2{font-size:clamp(34px,5vw,60px)}.presentation-mode .stage-title{align-items:flex-start}.presentation-mode .num{width:72px;height:72px;font-size:34px;border-radius:24px}.presentation-mode .chips{grid-template-columns:repeat(2,minmax(0,1fr))}.presentation-mode pre{max-height:34vh}.presentation-mode .presentation-ui{position:fixed;left:50%;bottom:22px;z-index:20;display:flex;gap:10px;align-items:center;transform:translateX(-50%);padding:10px;border-radius:999px;background:rgba(15,23,42,.82);box-shadow:0 18px 42px rgba(3,7,18,.32);backdrop-filter:blur(12px)}.presentation-ui button{padding:10px 13px;background:#dbeafe;color:#0f172a}.presentation-ui .presentation-exit{background:#fda4af;color:#4c0519}.presentation-counter{min-width:74px;color:white;font-weight:1000;text-align:center}.presentation-hint{position:fixed;right:24px;top:22px;z-index:20;color:rgba(255,255,255,.8);font-size:13px;font-weight:900}.presentation-mode .presentation-hint{display:block}.presentation-hint{display:none}
+@media(prefers-reduced-motion:no-preference){body{animation:bgDrift 24s linear infinite}.hero:after{animation:floatTile 7s ease-in-out infinite}.hero-visual img{animation:gentleZoom 14s ease-in-out infinite alternate}.stage:before{background-size:220% 100%;animation:stripeFlow 8s linear infinite}.num{animation:softPulse 4.5s ease-in-out infinite}.presentation-mode .stage.active-slide{animation:slidePage .28s ease both}@keyframes bgDrift{from{background-position:0 0,0 0,0 0}to{background-position:0 0,42px 42px,-42px 42px}}@keyframes floatTile{0%,100%{transform:rotate(12deg) translateY(0)}50%{transform:rotate(9deg) translateY(10px)}}@keyframes gentleZoom{from{transform:scale(1)}to{transform:scale(1.045)}}@keyframes stripeFlow{from{background-position:0 0}to{background-position:220% 0}}@keyframes softPulse{0%,100%{filter:saturate(1);transform:scale(1)}50%{filter:saturate(1.15);transform:scale(1.035)}}@keyframes slidePage{from{opacity:0;transform:translateX(18px) scale(.99)}to{opacity:1;transform:translateX(0) scale(1)}}}
+@media(max-width:900px){.quick,.layout,.concept,.chips{grid-template-columns:1fr} nav{position:static} .hero{grid-template-columns:1fr;padding:32px 24px}.hero-visual{max-width:520px}.stage-title{flex-direction:column}.presentation-mode .stage{width:calc(100vw - 28px);height:calc(100vh - 102px);padding:22px}.presentation-mode .chips{grid-template-columns:1fr}}
+@media print{nav,button,.toast{display:none} body{background:white} .stage,.section,.hero,.footer{box-shadow:none;page-break-inside:avoid} pre{max-height:none;color:#111827;background:#f8fafc} .prompt{background:white;border:1px solid #e2e8f0} .prompt-head{background:#f1f5f9;color:#111827}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<div class="hero-copy">
+<span class="badge">📚 무료 플랜 · Windows Codex · 5.4-mini</span>
+<h1>독서커뮤니티 웹앱 개발<br>실습 자료</h1>
+<p>로컬 앱 → API → GitHub → Vercel → Supabase MCP → Kakao 로그인 순서로 진행합니다.</p>
+<div class="hero-actions"><button type="button" id="enterPresentation" class="presentation-toggle">전체화면 모드</button></div>
+</div>
+<a class="hero-visual" href="reading-community-app-preview.png" download="뿌뿌이미지.png" title="이미지 다운로드">
+  <img src="reading-community-app-preview.png" alt="독서커뮤니티 앱 미리보기">
+  <span>이미지 클릭해서 다운로드</span>
+</a>
+</header>
+<section class="quick"><div><b>모델</b><span>5.4-mini</span></div><div><b>Reasoning</b><span>Medium</span></div><div><b>초반 MCP</b><span>사용 안 함</span></div><div><b>설치</b><span>필요할 때만</span></div></section>
+<div class="layout">
+<nav><h3>단계 바로가기</h3><a href="#s0"><span class="dot">0</span>Windows Codex 설정</a><a href="#s1"><span class="dot">1</span>로컬 MVP 만들기</a><a href="#s2"><span class="dot">2</span>도서검색 API 붙이기</a><a href="#s3"><span class="dot">3</span>GitHub 가입 후 commit &amp; push</a><a href="#s4"><span class="dot">4</span>Vercel 가입 후 외부 배포</a><a href="#s5"><span class="dot">5</span>Supabase 가입 후 MCP 연결</a><a href="#s6"><span class="dot">6</span>Vercel 환경변수 추가 후 재배포</a><a href="#s7"><span class="dot">7</span>Kakao Developers 준비 후 카카오 로그인</a></nav>
+<main>
+<section class="section"><h2>도구 역할</h2><div class="concept"><div><i>🤖</i><h3>Codex</h3><p>코드를 만들고 수정하는 AI 개발자</p></div><div><i>🗂️</i><h3>GitHub</h3><p>코드를 저장하는 문서고</p></div><div><i>🚀</i><h3>Vercel</h3><p>웹사이트를 외부에 공개</p></div><div><i>🗄️</i><h3>Supabase</h3><p>데이터 저장·로그인·권한 관리</p></div></div></section>
+<section class="section"><h2>가입·설치 요약</h2><p>처음부터 모두 설치하지 않고, 필요한 순간에만 확인합니다.</p><div class="table"><table><thead><tr><th>단계</th><th>내용</th><th>가입 필요</th><th>설치/연결</th></tr></thead><tbody><tr><td>0단계</td><td>Windows Codex 설정</td><td>없음</td><td>없음</td></tr><tr><td>1단계</td><td>로컬 MVP 만들기</td><td>없음</td><td>Node.js LTS, npm — 필요한 순간에만 설치</td></tr><tr><td>2단계</td><td>도서검색 API 붙이기</td><td>없음</td><td>없음</td></tr><tr><td>3단계</td><td>GitHub 가입 후 commit &amp; push</td><td>GitHub 가입 필요</td><td>Git for Windows — 필요한 순간에만 설치</td></tr><tr><td>4단계</td><td>Vercel 가입 후 외부 배포</td><td>Vercel 가입 필요</td><td>없음</td></tr><tr><td>5단계</td><td>Supabase 가입 후 MCP 연결</td><td>Supabase 가입 필요</td><td>Supabase MCP, @supabase/supabase-js — 필요한 순간에만 연결/설치</td></tr><tr><td>6단계</td><td>Vercel 환경변수 추가 후 재배포</td><td>추가 가입 없음</td><td>없음</td></tr><tr><td>7단계</td><td>Kakao Developers 준비 후 카카오 로그인</td><td>Kakao Developers 사용 필요</td><td>없음</td></tr></tbody></table></div></section>
+
+    <article class="stage" id="s0">
+      <div class="stage-title">
+        <div class="num">0</div>
+        <div><small>시작 준비</small><h2>Windows Codex 설정</h2><p>설정만 확인합니다. 실제 앱 생성은 1단계에서 시작합니다.</p></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>없음</span></div>
+        <div><b>🧩 설치/연결</b><span>없음</span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>Windows Codex 실행</li><li>새 프로젝트 폴더 열기</li><li>모델: 5.4-mini</li><li>Reasoning: Medium</li><li>MCP/플러그인/웹검색은 처음에는 사용하지 않음</li></ol></div>
+      
+    </article>
+    
+    <article class="stage" id="s1">
+      <div class="stage-title">
+        <div class="num">1</div>
+        <div><small>localhost 확인</small><h2>로컬 MVP 만들기</h2></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>없음</span></div>
+        <div><b>🧩 설치/연결</b><span>Node.js LTS, npm — 필요한 순간에만 설치</span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>Windows Codex에서 새 폴더 열기</li><li>아래 프롬프트 붙여넣기</li><li>Codex가 Node.js/npm이 없다고 하면 설치 승인</li><li>작업 완료 후 localhost 주소에서 앱 확인</li></ol></div>
+      
+    <div class="prompt">
+      <div class="prompt-head">
+        <div><span>Codex 프롬프트 1</span><b>그대로 복사해서 붙여넣기</b></div>
+        <button data-copy="p1">복사</button>
+      </div>
+      <pre id="p1"><code>/goal
+무료 플랜 Windows Codex 실습용으로 &quot;독서 커뮤니티&quot; MVP를 만들어줘.
+
+중요:
+처음부터 모든 프로그램을 설치하지 말고,
+이번 단계에 필요한 Node.js와 npm만 확인해줘.
+설치가 필요할 때만 나에게 알려주고, 내 승인 후 설치를 시도해줘.
+
+모델 기준:
+- 5.4-mini
+- Reasoning Medium
+- MCP/플러그인/웹검색 사용 금지
+- 새 라이브러리는 꼭 필요할 때만
+- 마지막에 npm run build 1번만 실행
+
+먼저 확인할 것:
+1. node --version
+2. npm --version
+3. 현재 작업 폴더 위치
+
+Node.js 또는 npm이 없을 경우:
+1. 아직 프로젝트를 만들지 말고 멈춰줘.
+2. Node.js LTS 설치가 필요하다고 알려줘.
+3. 설치 명령을 먼저 보여줘.
+4. 내가 승인하면 winget으로 설치를 시도해줘.
+
+설치 명령 예시:
+winget install OpenJS.NodeJS.LTS
+
+설치 주의:
+- 강제로 설치하지 말 것
+- 관리자 권한 팝업은 내가 직접 승인
+- 설치 후 Codex 또는 PowerShell 재시작이 필요하면 알려줄 것
+- 설치 로그는 길게 설명하지 말고 성공/실패만 요약
+- 삭제 작업 금지
+
+Node.js와 npm이 정상 확인되면 진행할 것:
+
+목표:
+내 컴퓨터에서 실행해 볼 수 있는 독서 공유 및 책 읽기 프로그램을 만든다.
+
+기술:
+- React + Vite + JavaScript
+- 현재 폴더가 비어 있으면 Vite React 프로젝트 생성
+- 기존 프로젝트가 있으면 필요한 파일만 수정
+
+기능:
+1. 모바일에서 보기 좋은 독서 커뮤니티 화면
+2. 사이트 제목: 독서 커뮤니티
+3. 읽는 중 책 목록
+4. 완독 책 목록
+5. 책 직접 추가
+6. 책 삭제
+7. 진행률 표시
+8. 책 제목/저자 내부 검색
+9. localStorage 저장
+10. 새로고침 후 데이터 유지
+11. 기본 샘플 책 5권
+12. README.md 작성
+
+주의:
+- Supabase는 아직 하지 않는다.
+- GitHub는 아직 하지 않는다.
+- Kakao 로그인은 아직 하지 않는다.
+- .env.local은 만들지 않는다.
+- 개인정보 예시는 넣지 않는다.
+
+작업 후:
+1. 변경 파일 목록
+2. 로컬 실행 주소
+3. 브라우저 확인 방법
+4. npm run build 결과
+5. 설치한 것이 있다면 무엇을 설치했는지 요약</code></pre>
+    </div>
+    </article>
+    
+    <article class="stage" id="s2">
+      <div class="stage-title">
+        <div class="num">2</div>
+        <div><small>Open Library API</small><h2>도서검색 API 붙이기</h2></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>없음</span></div>
+        <div><b>🧩 설치/연결</b><span>없음</span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>1단계 앱이 localhost에서 열리는지 확인</li><li>아래 프롬프트 붙여넣기</li><li>검색창에서 책 검색 테스트</li><li>검색 결과를 내 서재에 추가해보기</li></ol></div>
+      
+    <div class="prompt">
+      <div class="prompt-head">
+        <div><span>Codex 프롬프트 2</span><b>그대로 복사해서 붙여넣기</b></div>
+        <button data-copy="p2">복사</button>
+      </div>
+      <pre id="p2"><code>/goal
+현재 독서 커뮤니티 앱에 Open Library 도서검색 API 기능을 붙여줘.
+
+현재 상태:
+- React + Vite + JavaScript 앱
+- localStorage 기반 독서 커뮤니티 MVP 작동 중
+- 직접 책 추가/삭제 가능
+
+중요:
+이번 단계에서는 추가 프로그램을 설치하지 않는다.
+Node.js와 npm이 이미 있는지 간단히 확인만 하고,
+새 라이브러리는 설치하지 않는다.
+
+사용할 API:
+https://openlibrary.org/search.json?q=검색어&amp;limit=10
+
+조건:
+- 모델 5.4-mini
+- Reasoning Medium
+- MCP/플러그인/웹검색 사용 금지
+- 새 라이브러리 설치 금지
+- Supabase는 아직 하지 않음
+- 마지막에 npm run build 1번만 실행
+
+기능:
+1. 도서 검색 영역 추가
+2. 검색어 입력창과 검색 버튼
+3. 검색어가 비어 있으면 API 호출하지 않기
+4. 검색 중 상태 표시
+5. 검색 결과 없음 표시
+6. 오류 발생 시 안내 표시
+7. 결과 카드에 제목, 저자, 첫 출간 연도, ISBN 표시
+8. cover_i가 있으면 표지 이미지 표시
+9. 표지 주소는 https://covers.openlibrary.org/b/id/{cover_i}-M.jpg 사용
+10. &quot;내 서재에 추가&quot; 버튼
+11. 추가한 책은 기존 책 목록과 localStorage에 저장
+12. 새로고침 후 유지
+
+가능하면:
+- API 호출 코드는 src/lib/bookSearchApi.js로 분리
+- 기존 디자인은 크게 바꾸지 않기
+
+작업 후:
+1. 변경 파일 목록
+2. 테스트 방법
+3. npm run build 결과</code></pre>
+    </div>
+    </article>
+    
+    <article class="stage" id="s3">
+      <div class="stage-title">
+        <div class="num">3</div>
+        <div><small>코드 저장</small><h2>GitHub 가입 후 commit &amp; push</h2></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>GitHub 가입 필요</span></div>
+        <div><b>🧩 설치/연결</b><span class="link-row"><a class="link-button" href="https://github.com" target="_blank" rel="noopener">GitHub 바로가기</a><a class="link-button secondary" href="https://git-scm.com/downloads/win" target="_blank" rel="noopener">Git for Windows</a></span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>github.com 접속 → Sign up → 이메일 인증</li><li>오른쪽 위 + → New repository</li><li>Repository name: reading-community-app</li><li>Create repository 클릭</li><li>생성된 repository 주소 복사</li><li>아래 프롬프트에 repo 주소 붙여넣기</li></ol></div>
+      
+    <div class="prompt">
+      <div class="prompt-head">
+        <div><span>Codex 프롬프트 3</span><b>그대로 복사해서 붙여넣기</b></div>
+        <button data-copy="p3">복사</button>
+      </div>
+      <pre id="p3"><code>/goal
+현재 독서 커뮤니티 프로젝트를 GitHub에 commit &amp; push까지 진행해줘.
+
+GitHub 저장소 주소:
+여기에_내_GitHub_repository_URL_붙여넣기
+
+현재 상태:
+1. 로컬 MVP가 작동한다.
+2. Open Library 도서검색 API가 작동한다.
+3. 아직 Supabase 연결은 하지 않았다.
+4. Vercel 배포를 위해 GitHub에 먼저 저장하고 싶다.
+
+중요:
+GitHub push는 플러그인이 아니라 로컬 git 명령으로 진행한다.
+이번 단계에서만 Git 설치 여부를 확인한다.
+
+먼저 확인할 것:
+1. git --version
+2. git status
+3. 현재 폴더가 git repository인지
+
+Git이 없을 경우:
+1. 아직 commit/push를 하지 말고 멈춰줘.
+2. Git for Windows 설치가 필요하다고 알려줘.
+3. 설치 명령을 먼저 보여줘.
+4. 내가 승인하면 winget으로 설치를 시도해줘.
+
+설치 명령 예시:
+winget install Git.Git
+
+설치 주의:
+- 강제로 설치하지 말 것
+- 관리자 권한 팝업은 내가 직접 승인
+- 설치 후 Codex 또는 PowerShell 재시작이 필요하면 알려줄 것
+- 설치 로그는 길게 설명하지 말고 성공/실패만 요약
+- 삭제 작업 금지
+
+Git이 정상 확인되면 진행할 것:
+
+반드시 확인:
+1. git status 확인
+2. .gitignore 확인
+3. .env.local 제외
+4. node_modules 제외
+5. dist 제외
+6. API key, service_role key, secret key가 커밋되지 않게 확인
+7. README.md 업데이트
+8. PROJECT_CONTEXT.md 작성 또는 업데이트
+9. TODO_NEXT.md 작성 또는 업데이트
+10. AGENTS.md 작성 또는 업데이트
+
+실행:
+1. npm run build
+2. git init이 안 되어 있으면 초기화
+3. remote origin 확인
+4. origin이 없으면 내가 제공한 GitHub URL로 설정
+5. git add
+6. git commit
+7. git push
+
+커밋 메시지:
+complete reading community local mvp and book search api
+
+조건:
+- 모델 5.4-mini
+- Reasoning Medium
+- GitHub MCP/Plugin 사용하지 않음
+- 불필요한 리팩터링 금지
+
+작업 후:
+1. commit 성공 여부
+2. push 성공 여부
+3. GitHub repo 주소
+4. 제외된 보안 파일
+5. 설치한 것이 있다면 무엇을 설치했는지 요약
+6. 다음 단계 Vercel 배포 안내</code></pre>
+    </div>
+    </article>
+    
+    <article class="stage" id="s4">
+      <div class="stage-title">
+        <div class="num">4</div>
+        <div><small>공개 주소 확보</small><h2>Vercel 가입 후 외부 배포</h2></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>Vercel 가입 필요</span></div>
+        <div><b>🧩 설치/연결</b><span class="link-row"><a class="link-button" href="https://vercel.com" target="_blank" rel="noopener">Vercel 바로가기</a></span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>vercel.com 접속</li><li>Continue with GitHub 클릭</li><li>Add New Project 클릭</li><li>GitHub repository 선택</li><li>Framework Preset: Vite 확인</li><li>Deploy 클릭</li><li>.vercel.app 주소 복사</li></ol></div>
+      
+    <div class="prompt">
+      <div class="prompt-head">
+        <div><span>Codex 프롬프트 4</span><b>그대로 복사해서 붙여넣기</b></div>
+        <button data-copy="p4">복사</button>
+      </div>
+      <pre id="p4"><code>/goal
+현재 GitHub에 push된 독서 커뮤니티 프로젝트를 Vercel에 배포할 수 있게 준비해줘.
+
+현재 상태:
+1. React + Vite + JavaScript 앱이다.
+2. GitHub에 push가 완료되어 있다.
+3. 아직 Supabase 연결은 하지 않았다.
+4. 먼저 Vercel 무료 배포 주소를 만들고 싶다.
+
+중요:
+이번 단계에서는 Vercel CLI, Vercel MCP, Vercel Plugin을 설치하지 않는다.
+수강생이 Vercel 웹사이트에서 직접 배포하도록 안내한다.
+
+목표:
+1. Vercel에서 GitHub repo를 연결해 배포할 수 있게 안내
+2. .vercel.app 공개 주소를 확보하게 안내
+3. 커스텀 도메인이 있는 경우 연결 방법을 README에 정리
+4. Supabase와 Kakao 로그인에서 이 공개 주소를 사용할 예정이라고 문서화
+5. npm run build 실행
+
+Codex가 할 일:
+1. package.json의 build 명령어 확인
+2. Vite 배포 설정 확인
+3. README.md에 Vercel 배포 방법 추가
+4. PROJECT_CONTEXT.md에 공개 주소 기록 항목 추가
+5. TODO_NEXT.md에 Supabase Redirect URL로 Vercel 주소를 사용할 것이라고 기록
+6. npm run build 실행
+
+Vercel에서 사용자가 할 일도 초보자용으로 정리:
+1. vercel.com 가입
+2. Continue with GitHub
+3. Add New Project
+4. GitHub repository 선택
+5. Framework Preset: Vite 확인
+6. Deploy 클릭
+7. .vercel.app 주소 복사
+
+조건:
+- 모델 5.4-mini
+- Reasoning Medium
+- Vercel MCP 사용 금지
+- Vercel Plugin 사용 금지
+- Supabase 연결은 아직 하지 않음
+- Kakao 로그인은 아직 하지 않음
+
+작업 후:
+1. Vercel 배포 전 체크 결과
+2. 사용자가 Vercel에서 클릭할 순서
+3. 공개 URL을 어디에 기록해야 하는지
+4. npm run build 결과</code></pre>
+    </div>
+    </article>
+    
+    <article class="stage" id="s5">
+      <div class="stage-title">
+        <div class="num">5</div>
+        <div><small>DB 저장</small><h2>Supabase 가입 후 MCP 연결</h2></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>Supabase 가입 필요</span></div>
+        <div><b>🧩 설치/연결</b><span class="link-row"><a class="link-button" href="https://supabase.com" target="_blank" rel="noopener">Supabase 바로가기</a><a class="link-button secondary" href="https://supabase.com/docs/guides/getting-started" target="_blank" rel="noopener">가이드 보기</a></span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>supabase.com 접속</li><li>GitHub 또는 이메일로 가입</li><li>New project 생성</li><li>Windows Codex에서 Supabase MCP 연결</li><li>강의용 프로젝트 선택</li><li>Vercel 공개 주소를 프롬프트에 붙여넣기</li></ol></div>
+      
+    <div class="prompt">
+      <div class="prompt-head">
+        <div><span>Codex 프롬프트 5</span><b>그대로 복사해서 붙여넣기</b></div>
+        <button data-copy="p5">복사</button>
+      </div>
+      <pre id="p5"><code>/goal
+Supabase MCP를 사용해서 현재 독서 커뮤니티 앱에 Supabase 저장 기능을 연결해줘.
+
+현재 상태:
+1. React + Vite + JavaScript 앱이다.
+2. 로컬 MVP가 작동한다.
+3. Open Library 도서검색 API가 작동한다.
+4. GitHub에 push되어 있다.
+5. Vercel 배포 주소가 있다.
+
+Vercel 공개 주소:
+여기에_Vercel_배포_URL_붙여넣기
+
+중요:
+이번 단계에서만 Supabase MCP 연결 여부를 확인한다.
+처음부터 MCP를 설치하지 않고, Supabase 저장 기능이 필요한 지금만 확인한다.
+
+MCP 사용 조건:
+1. Supabase MCP가 이미 연결되어 있으면 사용한다.
+2. 연결되어 있지 않으면 &quot;Supabase MCP 연결 필요&quot;라고 알려준다.
+3. 가능하면 Windows Codex에서 Supabase MCP를 연결하는 방법을 초보자용으로 안내한다.
+4. 연결 또는 설치가 필요하면 명령이나 절차를 먼저 보여주고 내 승인을 받아라.
+5. MCP 연결이 안 되면 수동 방식으로 Project URL과 Publishable key를 입력하는 대체 방법을 안내한다.
+
+Supabase MCP 연결 안내에 포함할 것:
+1. Supabase 계정 로그인 필요
+2. 강의용 프로젝트 선택
+3. 운영 DB 연결 금지
+4. 위험한 SQL 실행 전 승인 필요
+5. 테이블 삭제, 전체 데이터 삭제 금지
+6. service_role key 사용 금지
+
+Supabase에서 할 일:
+1. 연결된 Supabase 프로젝트 확인
+2. 프로젝트 URL 확인
+3. publishable key 또는 anon public key 확인
+4. books 테이블 존재 여부 확인
+5. 없으면 books 테이블 생성용 SQL 또는 migration 작성
+6. RLS 활성화
+7. 사용자별로 자기 책만 읽고/추가/수정/삭제할 수 있는 policy 적용
+8. Anonymous Sign-in 활성화 여부 확인
+9. 필요한 Redirect URL 안내
+   - http://localhost:5173
+   - 위에 입력한 Vercel 공개 주소
+
+앱 코드에서 필요한 설치:
+1. @supabase/supabase-js가 설치되어 있는지 확인
+2. 없으면 설치 명령을 먼저 보여주고 내 승인을 받아라
+3. 승인 후 설치한다
+
+설치 명령:
+npm install @supabase/supabase-js
+
+앱 코드에서 할 일:
+1. .env.local 생성 또는 업데이트
+2. .env.example에는 실제 값 없이 예시만 작성
+3. .gitignore에 .env.local 포함 확인
+4. src/lib/supabase.js 생성 또는 수정
+5. VITE_SUPABASE_URL 사용
+6. VITE_SUPABASE_ANON_KEY 사용
+7. VITE_PUBLIC_SITE_URL에 Vercel 공개 주소 사용
+8. 앱 시작 시 Anonymous Sign-in
+9. books 테이블에서 목록 불러오기
+10. 책 추가 시 Supabase insert
+11. 책 삭제 시 Supabase delete
+12. Supabase 실패 시 localStorage fallback
+13. 저장/오류/로딩 메시지 표시
+14. 공유 주소 복사 버튼 추가
+
+Vercel 환경변수:
+README.md에 아래 값을 Vercel Project Settings → Environment Variables에 넣어야 한다고 기록한다.
+- VITE_SUPABASE_URL
+- VITE_SUPABASE_ANON_KEY
+- VITE_PUBLIC_SITE_URL
+
+보안:
+1. service_role key 사용 금지
+2. secret key 사용 금지
+3. database password 사용 금지
+4. .env.local GitHub 업로드 금지
+5. 실제 key 값은 보고서에 그대로 출력하지 않기
+6. 운영 DB 작업 금지
+
+조건:
+- 모델 5.4-mini
+- Reasoning Medium
+- 오류가 나면 High로 바꿔 다시 시도 가능
+- 불필요한 리팩터링 금지
+- 마지막에 npm run build 1번 실행
+
+작업 후:
+1. Supabase MCP 연결 확인 여부
+2. MCP를 설치/연결했다면 어떤 방식으로 했는지 요약
+3. Supabase 테이블과 RLS policy 요약
+4. 변경 파일 목록
+5. .env.local 보안 확인
+6. Vercel 환경변수 목록
+7. Supabase Redirect URL 목록
+8. 브라우저 테스트 순서
+9. npm run build 결과</code></pre>
+    </div>
+    </article>
+    
+    <article class="stage" id="s6">
+      <div class="stage-title">
+        <div class="num">6</div>
+        <div><small>외부 주소에서 DB 작동</small><h2>Vercel 환경변수 추가 후 재배포</h2></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>추가 가입 없음</span></div>
+        <div><b>🧩 설치/연결</b><span>없음</span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>Vercel Dashboard 접속</li><li>프로젝트 선택 → Settings → Environment Variables</li><li>VITE_SUPABASE_URL 입력</li><li>VITE_SUPABASE_ANON_KEY 입력</li><li>VITE_PUBLIC_SITE_URL 입력</li><li>Deployments에서 Redeploy</li><li>공개 주소에서 책 저장/불러오기 테스트</li></ol></div>
+      
+    <div class="prompt">
+      <div class="prompt-head">
+        <div><span>Codex 프롬프트 6</span><b>그대로 복사해서 붙여넣기</b></div>
+        <button data-copy="p6">복사</button>
+      </div>
+      <pre id="p6"><code>/goal
+Supabase 연결 후 Vercel에서도 정상 작동하도록 환경변수 설정과 재배포 방법을 안내해줘.
+
+현재 상태:
+1. 로컬에서는 Supabase 연결이 되었거나 연결 준비가 되었다.
+2. GitHub에 push되어 있다.
+3. Vercel 배포 주소가 있다.
+4. Vercel에 환경변수를 추가해야 한다.
+
+중요:
+이번 단계에서는 Vercel CLI나 MCP를 설치하지 않는다.
+Vercel 웹사이트에서 직접 설정하도록 안내한다.
+
+Vercel에 추가할 환경변수:
+- VITE_SUPABASE_URL
+- VITE_SUPABASE_ANON_KEY
+- VITE_PUBLIC_SITE_URL
+
+Codex가 할 일:
+1. README.md에 Vercel 환경변수 추가 방법 정리
+2. PROJECT_CONTEXT.md에 배포 주소와 환경변수 필요성 정리
+3. .env.example이 위 3개 변수를 포함하는지 확인
+4. .env.local이 GitHub에 올라가지 않도록 .gitignore 확인
+5. npm run build 실행
+
+사용자가 Vercel에서 할 일:
+1. Vercel Dashboard 접속
+2. 프로젝트 선택
+3. Settings 클릭
+4. Environment Variables 클릭
+5. 위 3개 값 입력
+6. Save
+7. Deployments에서 Redeploy
+8. 공개 주소에서 책 저장/불러오기 테스트
+
+조건:
+- 모델 5.4-mini
+- Reasoning Medium
+- 설치 작업 금지
+- Vercel CLI 사용 금지
+- Vercel MCP 사용 금지
+
+작업 후:
+1. 사용자가 해야 할 Vercel 설정 순서
+2. 환경변수 목록
+3. 재배포 후 테스트 방법
+4. npm run build 결과</code></pre>
+    </div>
+    </article>
+    
+    <article class="stage" id="s7">
+      <div class="stage-title">
+        <div class="num">7</div>
+        <div><small>심화 로그인</small><h2>Kakao Developers 준비 후 카카오 로그인</h2></div>
+      </div>
+      <div class="chips">
+        <div><b>👤 가입 필요</b><span>Kakao Developers 사용 필요</span></div>
+        <div><b>🧩 설치/연결</b><span class="link-row"><a class="link-button" href="https://developers.kakao.com" target="_blank" rel="noopener">Kakao Developers</a></span></div>
+      </div>
+      <div class="todo"><h3>개인이 해야 하는 것</h3><ol><li>developers.kakao.com 접속</li><li>카카오 계정으로 로그인</li><li>내 애플리케이션 → 애플리케이션 추가</li><li>Web 플랫폼 등록</li><li>사이트 도메인 등록: localhost, Vercel 주소</li><li>카카오 로그인 활성화</li><li>Supabase Authentication Providers에서 Kakao 활성화</li></ol></div>
+      
+    <div class="prompt">
+      <div class="prompt-head">
+        <div><span>Codex 프롬프트 7</span><b>그대로 복사해서 붙여넣기</b></div>
+        <button data-copy="p7">복사</button>
+      </div>
+      <pre id="p7"><code>/goal
+현재 독서 커뮤니티 앱에 카카오 로그인을 붙여줘.
+
+방식:
+Kakao JavaScript SDK 직접 구현이 아니라,
+Supabase Auth의 Kakao provider를 사용한다.
+
+중요:
+이번 단계에서 Kakao SDK를 새로 설치하지 않는다.
+Supabase Auth의 signInWithOAuth 기능을 사용한다.
+추가 패키지가 꼭 필요하다고 판단되면 설치하지 말고 먼저 나에게 이유를 설명해줘.
+
+현재 상태:
+1. React + Vite + JavaScript 앱이다.
+2. Supabase 연결이 되어 있다.
+3. Vercel 공개 주소가 있다.
+4. books 테이블은 user_id 기준으로 저장된다.
+
+수강생이 미리 설정해야 하는 것:
+1. Kakao Developers에서 앱 생성
+2. Web 플랫폼 등록
+3. 사이트 도메인 등록
+4. Kakao Login 활성화
+5. REST API key 확인
+6. Client Secret 생성
+7. Supabase Authentication Providers에서 Kakao 활성화
+8. Supabase Callback URL을 Kakao Redirect URI에 등록
+9. Supabase Redirect URL에 localhost와 Vercel 주소 등록
+
+구현할 기능:
+1. 카카오로 로그인 버튼
+2. supabase.auth.signInWithOAuth 사용
+3. provider는 kakao
+4. 로그인 후 session 확인
+5. 사용자 정보 표시
+6. 로그아웃 버튼
+7. 로그인한 user_id로 책 저장
+8. 로그인 전 안내 문구
+9. 기존 localStorage fallback 유지
+10. 로그인 상태 변경 시 책 목록 다시 불러오기
+11. npm run build 실행
+
+주의:
+- Kakao REST API key와 Client Secret은 React 코드에 넣지 않는다.
+- Kakao Client Secret은 Supabase Dashboard에만 넣는다.
+- service_role key는 절대 사용하지 않는다.
+- 리다이렉트 오류가 나면 Kakao Redirect URI와 Supabase Redirect URL을 확인하도록 안내한다.
+- 무료 플랜 실습이므로 불필요한 리팩터링 금지
+
+작업 후:
+1. 추가/수정 파일
+2. 카카오 로그인 버튼 위치
+3. Supabase Auth 흐름
+4. Kakao Developers 확인 항목
+5. Supabase Dashboard 확인 항목
+6. npm run build 결과
+7. 흔한 오류와 해결 방법</code></pre>
+    </div>
+    </article>
+    
+</main>
+</div>
+</div>
+<div class="presentation-hint" id="presentationHint">← → 방향키로 단계 이동</div>
+<div class="presentation-ui" id="presentationUi">
+  <button type="button" id="presentationPrev">이전</button>
+  <span class="presentation-counter" id="presentationCounter">1 / 8</span>
+  <button type="button" id="presentationNext">다음</button>
+  <button type="button" class="presentation-exit" id="presentationExit">종료</button>
+</div>
+<div class="toast" id="toast">프롬프트를 복사했습니다.</div>
+<script>
+const toast=document.getElementById('toast');
+const storageKey=id=>`reading-community-prompt:${id}`;
+const showToast=message=>{
+  toast.textContent=message;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),1500);
+};
+const getPromptText=id=>{
+  const code=document.querySelector(`#${id} code`);
+  return code ? code.textContent : '';
+};
+const setPromptText=(id,value)=>{
+  const code=document.querySelector(`#${id} code`);
+  if(code) code.textContent=value;
+};
+const slides=Array.from(document.querySelectorAll('.stage'));
+const enterPresentationBtn=document.getElementById('enterPresentation');
+const presentationCounter=document.getElementById('presentationCounter');
+const presentationPrev=document.getElementById('presentationPrev');
+const presentationNext=document.getElementById('presentationNext');
+const presentationExit=document.getElementById('presentationExit');
+let presentationIndex=0;
+const updatePresentation=()=>{
+  slides.forEach((slide,index)=>{
+    slide.classList.toggle('active-slide',index===presentationIndex);
+    if(index===presentationIndex) slide.scrollTop=0;
+  });
+  if(presentationCounter) presentationCounter.textContent=`${presentationIndex+1} / ${slides.length}`;
+};
+const isPresentationMode=()=>document.body.classList.contains('presentation-mode');
+const enterPresentation=async()=>{
+  if(!slides.length) return;
+  presentationIndex=0;
+  document.body.classList.add('presentation-mode');
+  updatePresentation();
+  try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();}
+  catch(e){showToast('브라우저 전체화면 없이 발표 모드를 시작합니다.');}
+};
+const exitPresentation=async()=>{
+  document.body.classList.remove('presentation-mode');
+  slides.forEach(slide=>slide.classList.remove('active-slide'));
+  try{if(document.fullscreenElement&&document.exitFullscreen) await document.exitFullscreen();}
+  catch(e){}
+};
+const movePresentation=delta=>{
+  if(!isPresentationMode()) return;
+  presentationIndex=Math.max(0,Math.min(slides.length-1,presentationIndex+delta));
+  updatePresentation();
+};
+enterPresentationBtn?.addEventListener('click',enterPresentation);
+presentationPrev?.addEventListener('click',()=>movePresentation(-1));
+presentationNext?.addEventListener('click',()=>movePresentation(1));
+presentationExit?.addEventListener('click',exitPresentation);
+document.addEventListener('fullscreenchange',()=>{
+  if(!document.fullscreenElement&&isPresentationMode()) exitPresentation();
+});
+document.querySelectorAll('[data-copy]').forEach(btn=>{
+  const actions=document.createElement('div');
+  actions.className='prompt-actions';
+  btn.parentNode.insertBefore(actions,btn);
+  actions.appendChild(btn);
+  const editBtn=document.createElement('button');
+  editBtn.type='button';
+  editBtn.className='edit-btn';
+  editBtn.dataset.edit=btn.dataset.copy;
+  editBtn.textContent='수정';
+  actions.insertBefore(editBtn,btn);
+});
+document.querySelectorAll('pre[id]').forEach(pre=>{
+  const saved=localStorage.getItem(storageKey(pre.id));
+  if(saved!==null) setPromptText(pre.id,saved);
+});
+document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const text=getPromptText(btn.dataset.copy);
+  try{await navigator.clipboard.writeText(text);btn.textContent='복사됨';showToast('프롬프트를 복사했습니다.');setTimeout(()=>{btn.textContent='복사'},1300);}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(btn.dataset.copy));const s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨';showToast('프롬프트가 선택되었습니다.');}
+}));
+document.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',()=>{
+  const id=btn.dataset.edit;
+  const pre=document.getElementById(id);
+  const prompt=pre.closest('.prompt');
+  if(prompt.querySelector('.prompt-editor')) return;
+  const textarea=document.createElement('textarea');
+  textarea.className='prompt-editor';
+  textarea.value=getPromptText(id);
+  pre.style.display='none';
+  pre.after(textarea);
+  const save=document.createElement('button');
+  save.type='button';
+  save.className='save-btn';
+  save.textContent='저장';
+  const cancel=document.createElement('button');
+  cancel.type='button';
+  cancel.className='cancel-btn';
+  cancel.textContent='취소';
+  btn.style.display='none';
+  btn.after(cancel);
+  btn.after(save);
+  textarea.focus();
+  save.addEventListener('click',()=>{
+    setPromptText(id,textarea.value);
+    localStorage.setItem(storageKey(id),textarea.value);
+    textarea.remove();
+    save.remove();
+    cancel.remove();
+    pre.style.display='';
+    btn.style.display='';
+    showToast('수정한 프롬프트를 저장했습니다.');
+  });
+  cancel.addEventListener('click',()=>{
+    textarea.remove();
+    save.remove();
+    cancel.remove();
+    pre.style.display='';
+    btn.style.display='';
+  });
+}));
+let editSequence='';
+document.addEventListener('keydown',event=>{
+  const tag=event.target.tagName;
+  if(isPresentationMode()){
+    if(tag==='INPUT'||tag==='TEXTAREA') return;
+    if(['ArrowRight','ArrowDown','PageDown',' '].includes(event.key)){event.preventDefault();movePresentation(1);return;}
+    if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(event.key)){event.preventDefault();movePresentation(-1);return;}
+    if(event.key==='Home'){event.preventDefault();presentationIndex=0;updatePresentation();return;}
+    if(event.key==='End'){event.preventDefault();presentationIndex=slides.length-1;updatePresentation();return;}
+    if(event.key==='Escape'){event.preventDefault();exitPresentation();return;}
+  }
+  if(tag==='INPUT'||tag==='TEXTAREA'||event.ctrlKey||event.metaKey||event.altKey) return;
+  if(!/^\d$/.test(event.key)) return;
+  editSequence=(editSequence+event.key).slice(-4);
+  if(editSequence==='1015'){
+    document.body.classList.add('editing-enabled');
+    showToast('프롬프트 수정 버튼이 열렸습니다.');
+  }
+});
+</script>
+</body></html>
+

@@ -1,8 +1,9 @@
-import { ArrowRight, BookOpen, CheckCircle2, FlaskConical, MonitorPlay, NotebookText, ShieldCheck, Wand2 } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, FlaskConical, MonitorPlay, NotebookText, Presentation, ShieldCheck, Wand2 } from "lucide-react";
 import { motion } from "motion/react";
 import DeckShell from "./components/DeckShell";
 import DemoPage from "./pages/DemoPage";
 import GlossaryPage from "./pages/GlossaryPage";
+import PracticeModePage from "./pages/PracticeModePage";
 import PromptLabPage from "./pages/PromptLabPage";
 import SlideMode from "./pages/SlideMode";
 import StudyMode from "./pages/StudyMode";
@@ -11,7 +12,8 @@ const quickLinks = [
   { href: "/slide", label: "발표 시작", icon: MonitorPlay, desc: "전체화면 발표와 키보드 조작" },
   { href: "/study", label: "학습 모드", icon: BookOpen, desc: "웹 교재처럼 다시 읽기" },
   { href: "/glossary", label: "용어집", icon: NotebookText, desc: "행정업무 비유로 이해" },
-  { href: "/demo", label: "실습 데모", icon: FlaskConical, desc: "질문·투표 보드 실행" },
+  { href: "/demo", label: "커뮤니티", icon: FlaskConical, desc: "질문·투표·자기소개 게시판" },
+  { href: "/practice-mode", label: "실습 모드", icon: Presentation, desc: "1015 편집과 다운로드가 되는 실습 자료" },
 ];
 
 function HomePage() {
@@ -66,7 +68,7 @@ function HomePage() {
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-4">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {quickLinks.map((link, index) => {
             const Icon = link.icon;
             return (
@@ -90,6 +92,7 @@ export default function App() {
   if (path.startsWith("/study")) return <StudyMode />;
   if (path.startsWith("/glossary")) return <GlossaryPage />;
   if (path.startsWith("/prompt")) return <PromptLabPage />;
+  if (path.startsWith("/practice-mode")) return <PracticeModePage />;
   if (path.startsWith("/demo")) return <DemoPage />;
   return <HomePage />;
 }

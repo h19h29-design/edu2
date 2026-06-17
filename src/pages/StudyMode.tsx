@@ -1,6 +1,7 @@
 import { ListChecks } from "lucide-react";
 import { useMemo } from "react";
 import DeckShell from "../components/DeckShell";
+import PresentationToolLayer from "../components/PresentationToolLayer";
 import PresenterNotes from "../components/PresenterNotes";
 import { chapters, slides } from "../data/slides";
 
@@ -27,7 +28,7 @@ export default function StudyMode() {
             ))}
           </div>
         </aside>
-        <div className="space-y-7">
+        <PresentationToolLayer className="space-y-7">
           {grouped.map((group) => (
             <section key={group.chapter} className="space-y-4">
               <div className="flex items-center gap-3">
@@ -59,7 +60,7 @@ export default function StudyMode() {
               ))}
             </section>
           ))}
-        </div>
+        </PresentationToolLayer>
       </div>
     </DeckShell>
   );

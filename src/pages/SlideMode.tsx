@@ -2,6 +2,7 @@ import { BookOpen, ExternalLink, Maximize2, Menu, PanelRightClose, PanelRightOpe
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AgentOrchestrator from "../components/AgentOrchestrator";
 import DeckShell from "../components/DeckShell";
+import PresentationToolLayer from "../components/PresentationToolLayer";
 import PresenterNotes from "../components/PresenterNotes";
 import SlideFrame from "../components/SlideFrame";
 import SlideNavigator from "../components/SlideNavigator";
@@ -123,15 +124,17 @@ export default function SlideMode() {
               </button>
               <button type="button" onClick={() => (window.location.href = slide.demoRoute || "/demo")} className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-black text-white shadow-sm">
                 <ExternalLink className="h-4 w-4" />
-                데모
+                커뮤니티
               </button>
             </div>
             <div className="rounded-2xl bg-white/80 px-4 py-2 text-sm font-black text-violet-700 shadow-sm">
-              ← → Space · F · M · N · D
+              ← → Space · F · M · N · D · 2 · 3 · 4
             </div>
           </div>
           <div ref={slideViewportRef} className="slide-viewport slide-fullscreen-surface scrollbar-soft overflow-auto rounded-[32px] border border-white/80 bg-white/68 p-5 shadow-card">
-            <SlideFrame slide={slide} dense />
+            <PresentationToolLayer>
+              <SlideFrame slide={slide} dense />
+            </PresentationToolLayer>
           </div>
           {showNotes ? (
             <div className="mt-4">

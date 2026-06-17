@@ -1,12 +1,12 @@
 import clsx from "clsx";
-import { Bell, BookOpen, FlaskConical, GraduationCap, MonitorPlay, NotebookText, UserRound } from "lucide-react";
+import { Bell, BookOpen, FlaskConical, GraduationCap, MonitorPlay, NotebookText, Presentation, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import ProgressBar from "./ProgressBar";
 
 type DeckShellProps = {
   children: ReactNode;
   progress?: number;
-  mode?: "slide" | "study" | "glossary" | "prompt" | "demo" | "home";
+  mode?: "slide" | "study" | "glossary" | "prompt" | "community" | "practice" | "home";
   bottom?: ReactNode;
   className?: string;
 };
@@ -15,7 +15,8 @@ const navItems = [
   { href: "/slide", mode: "slide", label: "발표 모드", icon: MonitorPlay },
   { href: "/study", mode: "study", label: "학습 모드", icon: BookOpen },
   { href: "/glossary", mode: "glossary", label: "용어집", icon: NotebookText },
-  { href: "/demo", mode: "demo", label: "실습 데모", icon: FlaskConical },
+  { href: "/demo", mode: "community", label: "커뮤니티", icon: FlaskConical },
+  { href: "/practice-mode", mode: "practice", label: "실습 모드", icon: Presentation },
 ];
 
 export default function DeckShell({ children, progress = 0, mode = "home", bottom, className }: DeckShellProps) {
