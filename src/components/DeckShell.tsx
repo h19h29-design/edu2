@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { Bell, BookOpen, FlaskConical, GraduationCap, MonitorPlay, NotebookText, Presentation, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
+import GlobalFollowControl from "./GlobalFollowControl";
 import ProgressBar from "./ProgressBar";
 
 type DeckShellProps = {
@@ -58,6 +59,7 @@ export default function DeckShell({ children, progress = 0, mode = "home", botto
             })}
           </nav>
           <div className="flex items-center gap-3">
+            <GlobalFollowControl />
             <button className="relative rounded-2xl bg-white p-3 shadow-sm">
               <Bell className="h-5 w-5 text-slate-600" />
               <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-rose-500" />

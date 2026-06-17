@@ -47,14 +47,15 @@ npm run build
 
 ## 강사화면 따라보기
 
-실습 자료 HTML은 Supabase Realtime Broadcast를 사용해 수강생이 원할 때만 강사 화면을 따라볼 수 있습니다. 일반 접속자는 자유롭게 자료를 보며, `강사화면 따라보기` 버튼을 누른 수강생만 강사의 현재 단계와 스크롤 위치를 반영합니다.
+강의 웹앱 전체는 Supabase Realtime Broadcast를 사용해 수강생이 원할 때만 강사 화면을 따라볼 수 있습니다. 일반 접속자는 자유롭게 자료를 보며, 상단 `강사화면 보기` 버튼을 누른 수강생만 강사의 현재 페이지, 단계, 스크롤 위치를 반영합니다. 독립 실습 HTML에도 같은 방식의 따라보기 버튼이 유지됩니다.
 
 ### 사용 방법
 
-- 수강생 URL: `https://edu2.h19h19.com/practice/reading-community-codex-practice-5-4mini.html`
-- 강사용 URL: `https://edu2.h19h19.com/practice/reading-community-codex-practice-5-4mini.html?role=host&room=codex-class`
-- 수강생은 우측 하단 `강사화면 따라보기` 버튼을 누르면 ON, 다시 누르면 OFF가 됩니다.
-- 강사는 `role=host` URL로 접속하면 `강사 모드 송출 중` 표시가 나오고 현재 `sectionId`, `scrollY`, `timestamp`를 700ms 이상 간격으로 broadcast 합니다.
+- 수강생 URL: `https://edu2.h19h19.com/`
+- 강사용 URL: `https://edu2.h19h19.com/?role=host&room=codex-class`
+- 독립 실습 HTML 강사용 URL: `https://edu2.h19h19.com/practice/reading-community-codex-practice-5-4mini.html?role=host&room=codex-class`
+- 수강생은 메인 상단 `강사화면 보기` 버튼을 누르면 ON, 다시 누르면 OFF가 됩니다.
+- 강사는 `role=host` URL로 접속하면 상단에 `강사 모드 송출 중` 표시가 나오고 현재 `pathname`, `search`, `hash`, `sectionId`, `scrollY`, `timestamp`를 700ms 이상 간격으로 broadcast 합니다.
 
 ### Supabase 설정 방법
 
@@ -62,7 +63,7 @@ npm run build
 2. Project URL과 client-side 공개 키를 확인합니다. 새 프로젝트는 publishable key, 기존 프로젝트는 legacy anon key를 사용할 수 있습니다.
 3. `public/practice/realtime-config.js`의 `supabaseUrl`, `supabaseAnonKey` 값을 채웁니다.
 4. `service_role` 또는 secret key는 절대 브라우저 코드에 넣지 않습니다.
-5. Broadcast는 public channel로 사용하므로 개인정보를 payload에 넣지 않습니다. 현재 payload는 `room`, `sectionId`, `scrollY`, `timestamp`만 보냅니다.
+5. Broadcast는 public channel로 사용하므로 개인정보를 payload에 넣지 않습니다. 현재 payload는 `room`, `pathname`, `search`, `hash`, `sectionId`, `scrollY`, `timestamp`만 보냅니다.
 6. Vercel에 배포한 뒤 강사용 URL과 수강생 URL을 각각 다른 브라우저에서 열어 테스트합니다.
 
 설정 파일 예시:
@@ -80,10 +81,10 @@ Supabase 설정값이 비어 있거나 네트워크가 끊겨도 기존 HTML 자
 ### 테스트 방법
 
 1. `npm run dev` 실행 후 수강생 화면을 엽니다.
-2. `http://localhost:5173/practice/reading-community-codex-practice-5-4mini.html` 접속
+2. `http://localhost:5173/` 접속
 3. 다른 브라우저나 탭에서 강사 화면을 엽니다.
-4. `http://localhost:5173/practice/reading-community-codex-practice-5-4mini.html?role=host&room=codex-class` 접속
-5. 수강생 화면에서 `강사화면 따라보기`를 누른 뒤 강사 화면을 스크롤합니다.
+4. `http://localhost:5173/?role=host&room=codex-class` 접속
+5. 수강생 화면에서 `강사화면 보기`를 누른 뒤 강사 화면에서 페이지 이동 또는 스크롤을 합니다.
 6. 수강생 화면에서 버튼을 다시 누르면 자유 보기 상태로 돌아가는지 확인합니다.
 
 ## 주요 파일
