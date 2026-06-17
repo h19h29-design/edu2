@@ -119,6 +119,7 @@ export default function GlobalFollowControl() {
   const channelRef = useRef<ReturnType<SupabaseClient["channel"]> | null>(null);
   const lastSentRef = useRef(0);
   const followModeRef = useRef(false);
+  const connectedRef = useRef(false);
 
   useEffect(() => {
     followModeRef.current = followMode;
@@ -164,10 +165,12 @@ export default function GlobalFollowControl() {
     channel.subscribe((nextStatus) => {
       if (nextStatus === "SUBSCRIBED") {
         setConnected(true);
+        connectedRef.current = true;
         setStatus(`room: ${roomRef.current}`);
       }
       if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(nextStatus)) {
         setConnected(false);
+        connectedRef.current = false;
         setStatus("Realtime 연결을 확인하세요.");
       }
     });
@@ -177,6 +180,7 @@ export default function GlobalFollowControl() {
     if (!isHost) return;
 
     const sendState = async (force = false) => {
+      if (!connectedRef.current) return;
       const now = Date.now();
       if (!force && now - lastSentRef.current < 700) return;
       lastSentRef.current = now;
