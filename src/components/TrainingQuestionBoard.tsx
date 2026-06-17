@@ -328,7 +328,7 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-sm font-bold text-rose-600">실제 학생, 학부모, 교직원 개인정보는 입력하지 않습니다. 관리 모드에서는 답글 작성과 삭제가 가능합니다.</p>
+          <p className="mt-1 text-sm font-bold text-rose-600">실제 학생, 학부모, 교직원 개인정보는 입력하지 않습니다.</p>
           {storageMessage ? (
             <p className={clsx("mt-1 text-xs font-black", storageMessage.startsWith("저장 실패") ? "text-rose-600" : "text-emerald-600")}>
               {storageMessage}
@@ -448,7 +448,7 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
                               </button>
                             </>
                           ) : (
-                            <span className="rounded-xl bg-white px-2 py-1 text-slate-400">관리자만 원본 확인</span>
+                            <span className="rounded-xl bg-white px-2 py-1 text-slate-400">원본 확인 제한</span>
                           )}
                         </span>
                       );

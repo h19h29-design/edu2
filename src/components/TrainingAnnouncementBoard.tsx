@@ -1,4 +1,4 @@
-import { Eraser, Image as ImageIcon, Lock, Paperclip, Send, ShieldCheck, Trash2 } from "lucide-react";
+import { Eraser, Image as ImageIcon, Paperclip, Send, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdminUnlock } from "../hooks/useAdminUnlock";
 
@@ -138,15 +138,9 @@ export default function TrainingAnnouncementBoard() {
                 <ShieldCheck className="h-3.5 w-3.5" />
                 관리 모드
               </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-2xl bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
-                <Lock className="h-3.5 w-3.5" />
-                읽기 전용
-              </span>
-            )}
+            ) : null}
           </div>
           <p className="mt-1 text-sm font-bold text-slate-600">강의자가 칠판처럼 핵심 문장, 과제, 공지 이미지를 띄워 두는 보드입니다.</p>
-          <p className="mt-1 text-xs font-black text-amber-700">수정은 관리자만 가능합니다. 숫자 1015를 누르면 관리 모드가 열립니다.</p>
           {storageMessage ? (
             <p className={`mt-1 text-xs font-black ${storageMessage.startsWith("저장 실패") ? "text-rose-600" : "text-emerald-600"}`}>{storageMessage}</p>
           ) : null}
@@ -166,7 +160,7 @@ export default function TrainingAnnouncementBoard() {
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className={isAdmin ? "grid gap-5 xl:grid-cols-[0.95fr_1.05fr]" : "grid gap-5"}>
         <div className="rounded-[28px] border border-emerald-900/60 bg-[radial-gradient(circle_at_top,rgba(74,222,128,0.18),transparent_28%),linear-gradient(180deg,#07221c,#0b3027)] p-5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-black uppercase tracking-[0.28em] text-emerald-200">Class Board</p>
@@ -174,7 +168,7 @@ export default function TrainingAnnouncementBoard() {
           </div>
           <h3 className="mt-4 text-3xl font-black leading-tight text-white">{board.title || "전달용 게시판"}</h3>
           <p className="mt-4 whitespace-pre-wrap text-lg font-semibold leading-9 text-emerald-50/95">
-            {board.message || "관리 모드에서 강의 메모를 입력하면 이 영역에 바로 반영됩니다."}
+            {board.message || "강의 메모가 이 영역에 표시됩니다."}
           </p>
 
           {board.images.length ? (
@@ -196,6 +190,7 @@ export default function TrainingAnnouncementBoard() {
           )}
         </div>
 
+        {isAdmin ? (
         <div className="rounded-[28px] border border-slate-200 bg-white/82 p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2 text-sm font-black text-slate-700">
             <Send className="h-4 w-4 text-violet-600" />
@@ -204,22 +199,20 @@ export default function TrainingAnnouncementBoard() {
           <div className="grid gap-3">
             <input
               value={board.title}
-              disabled={!isAdmin}
               onChange={(event) => updateBoard({ title: event.target.value })}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none ring-violet-200 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none ring-violet-200 focus:ring-4"
               placeholder="게시판 제목"
             />
             <textarea
               value={board.message}
-              disabled={!isAdmin}
               onChange={(event) => updateBoard({ message: event.target.value })}
-              className="min-h-56 rounded-2xl border border-slate-200 bg-white px-4 py-4 font-semibold leading-7 outline-none ring-violet-200 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="min-h-56 rounded-2xl border border-slate-200 bg-white px-4 py-4 font-semibold leading-7 outline-none ring-violet-200 focus:ring-4"
               placeholder="강의 중 전달할 문장을 입력하세요."
             />
             <div className="flex flex-wrap items-center gap-3">
               <label
                 htmlFor="announcement-board-images"
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-black ${isAdmin ? "cursor-pointer border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100" : "border border-slate-200 bg-slate-100 text-slate-400"}`}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 hover:bg-blue-100"
               >
                 <ImageIcon className="h-4 w-4" />
                 이미지 첨부
@@ -229,7 +222,6 @@ export default function TrainingAnnouncementBoard() {
                 type="file"
                 accept="image/*"
                 multiple
-                disabled={!isAdmin}
                 className="sr-only"
                 onChange={(event) => {
                   void handleImageChange(event.target.files);
@@ -246,17 +238,16 @@ export default function TrainingAnnouncementBoard() {
                     <Paperclip className="h-4 w-4 text-blue-500" />
                     <span className="max-w-40 truncate">{image.name}</span>
                     <span className="text-slate-400">{formatBytes(image.size)}</span>
-                    {isAdmin ? (
-                      <button type="button" onClick={() => removeImage(image.id)} className="rounded-full p-1 text-slate-400 hover:bg-white hover:text-rose-500">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    ) : null}
+                    <button type="button" onClick={() => removeImage(image.id)} className="rounded-full p-1 text-slate-400 hover:bg-white hover:text-rose-500">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </span>
                 ))}
               </div>
             ) : null}
           </div>
         </div>
+        ) : null}
       </div>
     </section>
   );

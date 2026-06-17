@@ -13,7 +13,7 @@ const quickLinks = [
   { href: "/study", label: "학습 모드", icon: BookOpen, desc: "웹 교재처럼 다시 읽기" },
   { href: "/glossary", label: "용어집", icon: NotebookText, desc: "행정업무 비유로 이해" },
   { href: "/demo", label: "커뮤니티", icon: FlaskConical, desc: "질문·투표·자기소개 게시판" },
-  { href: "/practice-mode", label: "실습 모드", icon: Presentation, desc: "1015 편집과 다운로드가 되는 실습 자료" },
+  { href: "/practice-mode", label: "실습 모드", icon: Presentation, desc: "다운로드가 포함된 독립 실습 자료" },
 ];
 
 function HomePage() {

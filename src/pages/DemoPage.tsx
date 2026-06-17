@@ -68,7 +68,7 @@ export default function DemoPage() {
               </div>
               <p className="text-2xl font-black text-slate-950">커뮤니티에서 실습 모드로 이어지는 흐름</p>
               <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-slate-600">
-                강의 앱 안에서는 커뮤니티 기능을 먼저 보여주고, 프롬프트 편집과 다운로드가 필요한 순간에는 독립 실습 모드로 이동하도록 구조를 나눴습니다.
+                강의 앱 안에서는 커뮤니티 기능을 먼저 보여주고, 실습 자료 확인과 다운로드가 필요한 순간에는 독립 실습 모드로 이동하도록 구조를 나눴습니다.
               </p>
             </div>
             <a href="/practice-mode" className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-card">
@@ -84,8 +84,8 @@ export default function DemoPage() {
             </div>
             <div className="rounded-[24px] border border-slate-200 bg-white/88 p-5 shadow-sm">
               <p className="text-sm font-black text-amber-700">2. 실습 모드</p>
-              <p className="mt-2 text-lg font-black text-slate-950">1015와 프롬프트 편집</p>
-              <p className="mt-2 text-sm font-bold leading-6 text-slate-500">실습 HTML 안에서 1015를 누르면 수정 버튼이 열리고, 저장 내용이 유지됩니다.</p>
+              <p className="mt-2 text-lg font-black text-slate-950">독립 실습 자료</p>
+              <p className="mt-2 text-sm font-bold leading-6 text-slate-500">실습 HTML은 발표용 커뮤니티와 분리되어 저장 내용과 다운로드 흐름을 안정적으로 유지합니다.</p>
             </div>
             <div className="rounded-[24px] border border-slate-200 bg-white/88 p-5 shadow-sm">
               <p className="text-sm font-black text-emerald-700">3. 다운로드</p>
