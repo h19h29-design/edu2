@@ -69,7 +69,13 @@ export default function PracticeModePage() {
                 <BookOpenCheck className="h-4 w-4" />
                 실습 HTML 실행 화면
               </div>
-              <p className="text-2xl font-black text-slate-950">독서커뮤니티 웹앱 개발 실습 자료</p>
+              <p className="text-2xl font-black leading-tight text-slate-950">
+                독서커뮤니티
+                <br />
+                웹앱 개발
+                <br />
+                실습 자료
+              </p>
               <p className="mt-2 text-sm font-bold leading-6 text-slate-600">
                 강의용 커뮤니티 허브와 분리해 두어서 실습 자료의 단축키, 편집 저장, 다운로드 기능이 충돌 없이 유지됩니다.
               </p>
