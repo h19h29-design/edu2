@@ -2,7 +2,6 @@ import { BookOpen, ExternalLink, Maximize2, Menu, PanelRightClose, PanelRightOpe
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AgentOrchestrator from "../components/AgentOrchestrator";
 import DeckShell from "../components/DeckShell";
-import PresentationToolLayer from "../components/PresentationToolLayer";
 import PresenterNotes from "../components/PresenterNotes";
 import SlideFrame from "../components/SlideFrame";
 import SlideNavigator from "../components/SlideNavigator";
@@ -132,9 +131,7 @@ export default function SlideMode() {
             </div>
           </div>
           <div ref={slideViewportRef} className="slide-viewport slide-fullscreen-surface scrollbar-soft overflow-auto rounded-[32px] border border-white/80 bg-white/68 p-5 shadow-card">
-            <PresentationToolLayer>
-              <SlideFrame slide={slide} dense />
-            </PresentationToolLayer>
+            <SlideFrame slide={slide} dense />
           </div>
           {showNotes ? (
             <div className="mt-4">

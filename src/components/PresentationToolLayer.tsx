@@ -17,6 +17,7 @@ type PresentationToolLayerProps = {
   children: ReactNode;
   className?: string;
   contentClassName?: string;
+  fixedControls?: boolean;
 };
 
 function isEditableTarget(target: EventTarget | null) {
@@ -26,7 +27,7 @@ function isEditableTarget(target: EventTarget | null) {
   return tagName === "input" || tagName === "textarea" || tagName === "select" || element.isContentEditable;
 }
 
-export default function PresentationToolLayer({ children, className, contentClassName }: PresentationToolLayerProps) {
+export default function PresentationToolLayer({ children, className, contentClassName, fixedControls = false }: PresentationToolLayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const drawingRef = useRef(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -231,7 +232,7 @@ export default function PresentationToolLayer({ children, className, contentClas
         </div>
       ) : null}
 
-      <div ref={panelRef} className="absolute right-4 top-4 z-30 flex items-start justify-end">
+      <div ref={panelRef} className={clsx(fixedControls ? "fixed right-4 top-24 z-[55]" : "absolute right-4 top-4 z-30", "flex items-start justify-end")}>
         <div className="flex flex-col items-end gap-2">
           <button
             type="button"

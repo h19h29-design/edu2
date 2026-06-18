@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const ADMIN_SEQUENCE = "1015";
 const ADMIN_STORAGE_KEY = "codex-training-admin-unlocked";
-const ADMIN_EVENT = "codex-training-admin-state";
+export const ADMIN_EVENT = "codex-training-admin-state";
 
 export function useAdminUnlock() {
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -39,7 +39,7 @@ export function useAdminUnlock() {
 
       const target = event.target as HTMLElement | null;
       const tagName = target?.tagName.toLowerCase();
-      if (tagName === "input" || tagName === "textarea" || target?.isContentEditable) return;
+      if (tagName === "input" || tagName === "textarea" || tagName === "select" || target?.isContentEditable) return;
 
       buffer = `${buffer}${event.key}`.slice(-ADMIN_SEQUENCE.length);
       if (buffer === ADMIN_SEQUENCE) {

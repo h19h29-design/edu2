@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { Eye, EyeOff, MonitorPlay } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { ADMIN_EVENT, useAdminUnlock } from "../hooks/useAdminUnlock";
 
 type TeacherPagePayload = {
   type: "teacher_page";
@@ -35,7 +36,6 @@ declare global {
   }
 }
 
-const ADMIN_SEQUENCE = "1015";
 const EVENT_NAME = "teacher-page";
 const PENDING_KEY = "edu2-teacher-page-pending";
 const FOLLOW_KEY_PREFIX = "edu2-follow-mode:";
@@ -151,12 +151,13 @@ function applyTeacherPage(payload: TeacherPagePayload) {
 }
 
 export default function GlobalFollowControl() {
-  const isHost = isHostCandidate();
+  const { isAdmin } = useAdminUnlock();
+  const shouldPreserveTeacherContext = isAdmin || isHostCandidate();
   const roomRef = useRef(roomFromLocation());
   const followStorageKey = `${FOLLOW_KEY_PREFIX}${roomRef.current}`;
   const [connected, setConnected] = useState(false);
   const [followMode, setFollowMode] = useState(() => sessionStorage.getItem(followStorageKey) === "1");
-  const [adminOpen, setAdminOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(() => isAdmin);
   const [teacherMode, setTeacherMode] = useState(false);
   const [status, setStatus] = useState("연결 준비 중");
   const channelRef = useRef<ReturnType<SupabaseClient["channel"]> | null>(null);
@@ -166,7 +167,6 @@ export default function GlobalFollowControl() {
   const seqRef = useRef(0);
   const lastHandledSeqRef = useRef(0);
   const lastSentPageRef = useRef("");
-  const keyBufferRef = useRef("");
 
   useEffect(() => {
     followModeRef.current = followMode;
@@ -176,6 +176,13 @@ export default function GlobalFollowControl() {
   useEffect(() => {
     teacherModeRef.current = teacherMode;
   }, [teacherMode]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      setFollowMode(false);
+      setAdminOpen(true);
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     const raw = sessionStorage.getItem(PENDING_KEY);
@@ -239,29 +246,34 @@ export default function GlobalFollowControl() {
       if (isEditableTarget(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.key === "Escape" && followModeRef.current) {
         setFollowMode(false);
-        return;
       }
-      if (!isHost || !/^\d$/.test(event.key)) return;
-      keyBufferRef.current = `${keyBufferRef.current}${event.key}`.slice(-ADMIN_SEQUENCE.length);
-      if (keyBufferRef.current === ADMIN_SEQUENCE) {
+    }
+    function onAdminState(event: Event) {
+      const custom = event as CustomEvent<boolean>;
+      if (custom.detail) {
         setAdminOpen(true);
-        keyBufferRef.current = "";
       }
     }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isHost]);
+    window.addEventListener(ADMIN_EVENT, onAdminState);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener(ADMIN_EVENT, onAdminState);
+    };
+  }, []);
 
   useEffect(() => {
-    if (!isHost) return;
+    if (!shouldPreserveTeacherContext) return;
 
     const preserveHostLinks = (event: MouseEvent) => {
       if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = (event.target as HTMLElement | null)?.closest("a[href]") as HTMLAnchorElement | null;
       if (!link || link.target || link.origin !== window.location.origin) return;
       const next = new URL(link.href);
-      next.searchParams.set("role", "host");
       next.searchParams.set("room", roomRef.current);
+      if (isHostCandidate()) {
+        next.searchParams.set("role", "host");
+      }
       if (next.href === link.href) return;
       event.preventDefault();
       window.location.href = next.toString();
@@ -269,10 +281,10 @@ export default function GlobalFollowControl() {
 
     document.addEventListener("click", preserveHostLinks, true);
     return () => document.removeEventListener("click", preserveHostLinks, true);
-  }, [isHost]);
+  }, [shouldPreserveTeacherContext]);
 
   useEffect(() => {
-    if (!isHost || !teacherMode) return;
+    if (!isAdmin || !teacherMode) return;
 
     const sendCurrentPage = async (force = false) => {
       if (!channelRef.current || !connectedRef.current || !teacherModeRef.current) return;
@@ -307,7 +319,7 @@ export default function GlobalFollowControl() {
       window.removeEventListener("click", scheduleSectionCheck);
       window.removeEventListener("hashchange", scheduleSectionCheck);
     };
-  }, [isHost, teacherMode]);
+  }, [isAdmin, teacherMode]);
 
   const sendNow = async () => {
     if (!channelRef.current || !connectedRef.current) return;
@@ -325,7 +337,7 @@ export default function GlobalFollowControl() {
     }
   };
 
-  if (isHost) {
+  if (isAdmin) {
     return (
       <div data-follow-control>
         {teacherMode && !adminOpen ? (

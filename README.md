@@ -52,10 +52,10 @@ npm run build
 ### 사용 방법
 
 - 수강생 URL: `https://edu2.h19h19.com/`
-- 강사용 URL: `https://edu2.h19h19.com/?role=host&room=codex-class`
-- 독립 실습 HTML 강사용 URL: `https://edu2.h19h19.com/practice/reading-community-codex-practice-5-4mini.html?role=host&room=codex-class`
+- 강사용 URL: `https://edu2.h19h19.com/?room=codex-class`
+- 독립 실습 HTML 강사용 URL: `https://edu2.h19h19.com/practice/reading-community-codex-practice-5-4mini.html?room=codex-class`
 - 수강생은 우측 하단 `강사화면 보기` 버튼을 누르면 ON, 다시 누르면 `자유보기` 상태가 됩니다.
-- 강사는 `role=host` URL로 접속한 뒤 강사용 비공개 단축키로 관리자 패널을 열고 `강사모드 켜기`를 눌러야 송출을 시작합니다.
+- 강사는 같은 URL에서 강사용 비공개 단축키로 관리자 패널을 열고 `강사모드 켜기`를 눌러야 송출을 시작합니다.
 - 송출 데이터는 현재 `pageId`, `seq`, `timestamp` 중심으로 유지하며, `scrollY`는 대상 섹션을 찾지 못할 때만 fallback으로 사용합니다.
 
 ### Supabase 설정 방법
@@ -84,7 +84,7 @@ Supabase 설정값이 비어 있거나 네트워크가 끊겨도 기존 HTML 자
 1. `npm run dev` 실행 후 수강생 화면을 엽니다.
 2. `http://localhost:5173/` 접속
 3. 다른 브라우저나 탭에서 강사 화면을 엽니다.
-4. `http://localhost:5173/?role=host&room=codex-class` 접속
+4. `http://localhost:5173/?room=codex-class` 접속
 5. 강사 화면에서 강사용 비공개 단축키로 관리자 패널을 열고 `강사모드 켜기`를 누릅니다.
 6. 수강생 화면에서 `강사화면 보기`를 누른 뒤 강사 화면에서 페이지나 섹션을 이동합니다.
 7. 수강생 화면에서 `자유보기`를 누르면 더 이상 이동하지 않는지 확인합니다.

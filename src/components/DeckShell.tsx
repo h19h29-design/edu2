@@ -2,7 +2,9 @@ import clsx from "clsx";
 import { Bell, BookOpen, FlaskConical, GraduationCap, MonitorPlay, NotebookText, Presentation, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import GlobalFollowControl from "./GlobalFollowControl";
+import PresentationToolLayer from "./PresentationToolLayer";
 import ProgressBar from "./ProgressBar";
+import { useAdminUnlock } from "../hooks/useAdminUnlock";
 
 type DeckShellProps = {
   children: ReactNode;
@@ -21,6 +23,9 @@ const navItems = [
 ];
 
 export default function DeckShell({ children, progress = 0, mode = "home", bottom, className }: DeckShellProps) {
+  const { isAdmin } = useAdminUnlock();
+  const mainContent = <main className={clsx("mx-auto max-w-[1720px] px-4 py-5", className)}>{children}</main>;
+
   return (
     <div className="lecture-bg min-h-screen text-slate-900">
       <GlobalFollowControl />
@@ -73,7 +78,7 @@ export default function DeckShell({ children, progress = 0, mode = "home", botto
           </div>
         </div>
       </header>
-      <main className={clsx("mx-auto max-w-[1720px] px-4 py-5", className)}>{children}</main>
+      {isAdmin ? <PresentationToolLayer fixedControls>{mainContent}</PresentationToolLayer> : mainContent}
       <footer className="sticky bottom-0 z-30 border-t border-slate-200 bg-white px-4 py-3">
         <div className="mx-auto flex max-w-[1720px] flex-col gap-3 lg:flex-row lg:items-center">
           <ProgressBar value={progress} label="학습 진행률" className="min-w-[280px] flex-1" />
