@@ -2,10 +2,12 @@ import { BookOpen, ExternalLink, Maximize2, Menu, PanelRightClose, PanelRightOpe
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AgentOrchestrator from "../components/AgentOrchestrator";
 import DeckShell from "../components/DeckShell";
+import PresentationToolLayer from "../components/PresentationToolLayer";
 import PresenterNotes from "../components/PresenterNotes";
 import SlideFrame from "../components/SlideFrame";
 import SlideNavigator from "../components/SlideNavigator";
 import { slides } from "../data/slides";
+import { useAdminUnlock } from "../hooks/useAdminUnlock";
 
 function clampSlide(index: number) {
   return Math.max(0, Math.min(slides.length - 1, index));
@@ -22,6 +24,7 @@ function slideIndexFromLocation() {
 }
 
 export default function SlideMode() {
+  const { isAdmin } = useAdminUnlock();
   const slideViewportRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(slideIndexFromLocation);
   const [showNotes, setShowNotes] = useState(false);
@@ -82,6 +85,7 @@ export default function SlideMode() {
     <DeckShell
       mode="slide"
       progress={progress}
+      presentationTools={false}
       bottom={
         <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
           <div className="glass-card flex items-center gap-3 rounded-2xl px-5 py-3 text-sm font-black text-slate-700">
@@ -131,7 +135,13 @@ export default function SlideMode() {
             </div>
           </div>
           <div ref={slideViewportRef} className="slide-viewport slide-fullscreen-surface scrollbar-soft overflow-auto rounded-[32px] border border-white/80 bg-white/68 p-5 shadow-card">
-            <SlideFrame slide={slide} dense />
+            {isAdmin ? (
+              <PresentationToolLayer className="h-full min-h-full" contentClassName="h-full">
+                <SlideFrame slide={slide} dense />
+              </PresentationToolLayer>
+            ) : (
+              <SlideFrame slide={slide} dense />
+            )}
           </div>
           {showNotes ? (
             <div className="mt-4">

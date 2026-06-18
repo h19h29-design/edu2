@@ -12,6 +12,7 @@ type DeckShellProps = {
   mode?: "slide" | "study" | "glossary" | "prompt" | "community" | "practice" | "home";
   bottom?: ReactNode;
   className?: string;
+  presentationTools?: boolean;
 };
 
 const navItems = [
@@ -22,7 +23,7 @@ const navItems = [
   { href: "/practice-mode", mode: "practice", label: "실습 모드", icon: Presentation },
 ];
 
-export default function DeckShell({ children, progress = 0, mode = "home", bottom, className }: DeckShellProps) {
+export default function DeckShell({ children, progress = 0, mode = "home", bottom, className, presentationTools = true }: DeckShellProps) {
   const { isAdmin } = useAdminUnlock();
   const mainContent = <main className={clsx("mx-auto max-w-[1720px] px-4 py-5", className)}>{children}</main>;
 
@@ -78,7 +79,7 @@ export default function DeckShell({ children, progress = 0, mode = "home", botto
           </div>
         </div>
       </header>
-      {isAdmin ? <PresentationToolLayer fixedControls>{mainContent}</PresentationToolLayer> : mainContent}
+      {isAdmin && presentationTools ? <PresentationToolLayer fixedControls>{mainContent}</PresentationToolLayer> : mainContent}
       <footer className="sticky bottom-0 z-30 border-t border-slate-200 bg-white px-4 py-3">
         <div className="mx-auto flex max-w-[1720px] flex-col gap-3 lg:flex-row lg:items-center">
           <ProgressBar value={progress} label="학습 진행률" className="min-w-[280px] flex-1" />
