@@ -49,7 +49,7 @@ export default function DemoPage() {
             <a href="#community-sections" className="rounded-[24px] border border-blue-200 bg-blue-50/80 p-4 transition hover:-translate-y-1">
               <MessageSquareText className="mb-3 h-6 w-6 text-blue-600" />
               <p className="font-black text-slate-950">질문 커뮤니티</p>
-              <p className="mt-1 text-sm font-bold leading-6 text-slate-500">질문, 첨부, 좋아요, 답글 흐름을 실습합니다.</p>
+              <p className="mt-1 text-sm font-bold leading-6 text-slate-500">질문, 첨부, 좋아요, 관리자 댓글 답변 흐름을 실습합니다.</p>
             </a>
             <a href="#intro-board" className="rounded-[24px] border border-emerald-200 bg-emerald-50/80 p-4 transition hover:-translate-y-1">
               <UserRound className="mb-3 h-6 w-6 text-emerald-600" />
@@ -80,7 +80,7 @@ export default function DemoPage() {
             <div className="rounded-[24px] border border-slate-200 bg-white/88 p-5 shadow-sm">
               <p className="text-sm font-black text-violet-700">1. 커뮤니티</p>
               <p className="mt-2 text-lg font-black text-slate-950">질문과 참여 흐름 확인</p>
-              <p className="mt-2 text-sm font-bold leading-6 text-slate-500">질문 등록, 답글, 자기소개 카드까지 발표용 화면에서 바로 보여줍니다.</p>
+              <p className="mt-2 text-sm font-bold leading-6 text-slate-500">질문 등록, 관리자 댓글 답변, 자기소개 카드까지 발표용 화면에서 바로 보여줍니다.</p>
             </div>
             <div className="rounded-[24px] border border-slate-200 bg-white/88 p-5 shadow-sm">
               <p className="text-sm font-black text-amber-700">2. 실습 모드</p>

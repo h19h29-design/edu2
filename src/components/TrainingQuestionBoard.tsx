@@ -47,7 +47,7 @@ function loadQuestions() {
 }
 
 function toCsv(rows: TrainingQuestion[]) {
-  const headers = ["id", "question", "author", "likes", "dislikes", "answered", "createdAt", "attachments", "replies"];
+  const headers = ["id", "question", "author", "likes", "dislikes", "answered", "createdAt", "attachments", "adminReplies"];
   const escape = (value: string | number | boolean | undefined) => `"${String(value ?? "").replaceAll('"', '""')}"`;
   return [
     headers.join(","),
@@ -281,14 +281,15 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
   function deleteReply(questionId: string, replyId: string) {
     if (!isAdmin) return;
     setQuestions((current) =>
-      current.map((item) =>
-        item.id === questionId
-          ? {
-              ...item,
-              replies: (item.replies ?? []).filter((reply) => reply.id !== replyId),
-            }
-          : item,
-      ),
+      current.map((item) => {
+        if (item.id !== questionId) return item;
+        const nextReplies = (item.replies ?? []).filter((reply) => reply.id !== replyId);
+        return {
+          ...item,
+          answered: nextReplies.length > 0,
+          replies: nextReplies,
+        };
+      }),
     );
   }
 
@@ -481,7 +482,15 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
           <article key={item.id} className="rounded-[24px] border border-slate-200 bg-white/86 p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="font-black leading-7 text-slate-900">{item.question}</p>
+                <div className="flex flex-wrap items-start gap-2">
+                  <p className="min-w-0 flex-1 font-black leading-7 text-slate-900">{item.question}</p>
+                  {item.replies?.length ? (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-2xl bg-blue-100 px-3 py-1 text-xs font-black text-blue-700">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      관리자 댓글 답변 {item.replies.length}개
+                    </span>
+                  ) : null}
+                </div>
                 <p className="mt-2 text-xs font-bold text-slate-500">
                   {item.author || "익명"} · {new Date(item.createdAt).toLocaleString("ko-KR")}
                 </p>
@@ -524,13 +533,13 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
                       <div key={reply.id} className="rounded-2xl border border-blue-100 bg-blue-50/80 px-4 py-3">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-black text-blue-700">관리자 답글</p>
+                            <p className="text-xs font-black text-blue-700">관리자 댓글 답변</p>
                             <p className="mt-1 whitespace-pre-wrap text-sm font-bold leading-6 text-slate-700">{reply.content}</p>
                             <p className="mt-1 text-xs font-bold text-slate-400">{new Date(reply.createdAt).toLocaleString("ko-KR")}</p>
                           </div>
                           {isAdmin ? (
                             <button type="button" onClick={() => deleteReply(item.id, reply.id)} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-600">
-                              답글 삭제
+                              댓글 삭제
                             </button>
                           ) : null}
                         </div>
@@ -573,7 +582,7 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
               <div className="mt-4 rounded-[22px] border border-emerald-100 bg-emerald-50/70 p-3">
                 <label className="mb-2 flex items-center gap-2 text-xs font-black text-emerald-800" htmlFor={`reply-${item.id}`}>
                   <MessageSquare className="h-4 w-4" />
-                  관리자 답글
+                  관리자 댓글 답변 작성
                 </label>
                 <div className="grid gap-2 md:grid-cols-[1fr_auto]">
                   <textarea
@@ -581,11 +590,11 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
                     value={replyDrafts[item.id] ?? ""}
                     onChange={(event) => setReplyDrafts((current) => ({ ...current, [item.id]: event.target.value }))}
                     className="min-h-20 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold outline-none ring-emerald-200 focus:ring-4"
-                    placeholder="수강생에게 보여줄 답글을 입력하세요"
+                    placeholder="수강생 질문에 공개 댓글 답변을 입력하세요"
                   />
                   <button type="button" onClick={() => addReply(item.id)} disabled={!(replyDrafts[item.id] ?? "").trim()} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300">
                     <Send className="h-4 w-4" />
-                    답글 등록
+                    댓글 답변 등록
                   </button>
                 </div>
               </div>
