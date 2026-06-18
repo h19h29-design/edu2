@@ -75,13 +75,20 @@ function formatBytes(bytes: number) {
   return `${Math.round(bytes / 1024 / 102.4) / 10}MB`;
 }
 
+function extensionFromType(type: string) {
+  if (type === "image/jpeg") return "jpg";
+  if (type === "image/webp") return "webp";
+  if (type === "image/gif") return "gif";
+  return "png";
+}
+
 function fileToAttachment(file: File): Promise<TrainingAttachment> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       resolve({
         id: `file-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        name: file.name,
+        name: file.name || `pasted-image-${Date.now()}.${extensionFromType(file.type)}`,
         size: file.size,
         type: file.type || "application/octet-stream",
         dataUrl: String(reader.result ?? ""),
@@ -134,6 +141,21 @@ async function loadAttachmentData(id: string): Promise<TrainingAttachment | null
   });
   db.close();
   return record;
+}
+
+async function deleteAttachmentData(id: string) {
+  const db = await openAttachmentDb();
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(ATTACHMENT_STORE_NAME, "readwrite");
+    transaction.objectStore(ATTACHMENT_STORE_NAME).delete(id);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+  db.close();
+}
+
+async function deleteAttachmentRecords(attachments: TrainingAttachment[] = []) {
+  await Promise.allSettled(attachments.map((attachment) => deleteAttachmentData(attachment.id)));
 }
 
 export default function TrainingQuestionBoard({ compact = false }: TrainingQuestionBoardProps) {
@@ -217,14 +239,18 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
   }
 
   function resetDemo() {
+    const attachmentsToDelete = questions.flatMap((item) => item.attachments ?? []).concat(pendingAttachments);
     setQuestions(normalizeQuestions(demoQuestions));
     setPendingAttachments([]);
     setAttachmentError("");
+    void deleteAttachmentRecords(attachmentsToDelete);
   }
 
   function deleteQuestion(id: string) {
     if (!isAdmin) return;
+    const target = questions.find((item) => item.id === id);
     setQuestions((current) => current.filter((item) => item.id !== id));
+    void deleteAttachmentRecords(target?.attachments ?? []);
   }
 
   function addReply(id: string) {
@@ -266,11 +292,11 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
     );
   }
 
-  async function handleAttachmentChange(files: FileList | null) {
-    if (!files?.length) return;
+  async function handleAttachmentFiles(files: File[]) {
+    if (!files.length) return;
     setAttachmentError("");
     const current = pendingAttachments.length;
-    const selected = Array.from(files).slice(0, Math.max(0, MAX_ATTACHMENTS - current));
+    const selected = files.slice(0, Math.max(0, MAX_ATTACHMENTS - current));
     if (current + files.length > MAX_ATTACHMENTS) {
       setAttachmentError(`첨부는 질문당 ${MAX_ATTACHMENTS}개까지만 가능합니다.`);
     }
@@ -284,8 +310,41 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
     setPendingAttachments((currentAttachments) => [...currentAttachments, ...attachments]);
   }
 
+  async function handleAttachmentChange(files: FileList | null) {
+    if (!files?.length) return;
+    await handleAttachmentFiles(Array.from(files));
+  }
+
+  async function handlePaste(event: React.ClipboardEvent<HTMLDivElement>) {
+    const imageFiles = Array.from(event.clipboardData.files).filter((file) => file.type.startsWith("image/"));
+    if (!imageFiles.length) return;
+    event.preventDefault();
+    await handleAttachmentFiles(imageFiles);
+  }
+
   function removePendingAttachment(id: string) {
     setPendingAttachments((current) => current.filter((attachment) => attachment.id !== id));
+    void deleteAttachmentData(id).catch(() => undefined);
+  }
+
+  async function deleteAttachment(questionId: string, attachmentId: string) {
+    if (!isAdmin) return;
+    setQuestions((current) =>
+      current.map((item) =>
+        item.id === questionId
+          ? {
+              ...item,
+              attachments: item.attachments?.filter((attachment) => attachment.id !== attachmentId),
+            }
+          : item,
+      ),
+    );
+    setPreviewAttachment((current) => (current?.id === attachmentId ? null : current));
+    try {
+      await deleteAttachmentData(attachmentId);
+    } catch {
+      setAttachmentError("첨부 기록은 지웠지만 브라우저 원본 저장소 정리에 실패했습니다.");
+    }
   }
 
   async function getStoredAttachment(attachment: TrainingAttachment) {
@@ -358,7 +417,7 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
         </div>
       </div>
 
-      <div className="grid gap-3 rounded-[24px] bg-white/72 p-4 md:grid-cols-[1fr_180px_auto]">
+      <div onPaste={(event) => void handlePaste(event)} className="grid gap-3 rounded-[24px] bg-white/72 p-4 md:grid-cols-[1fr_180px_auto]">
         <input
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
@@ -395,10 +454,10 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
               }}
             />
             <p className="text-xs font-bold leading-5 text-slate-500">
-              교육용 로컬 첨부입니다. 질문당 {MAX_ATTACHMENTS}개, 파일당 {formatBytes(MAX_ATTACHMENT_BYTES)} 이하만 저장됩니다.
+              교육용 로컬 첨부입니다. 질문 입력칸에 이미지를 붙여넣어도 첨부됩니다. 질문당 {MAX_ATTACHMENTS}개, 파일당 {formatBytes(MAX_ATTACHMENT_BYTES)} 이하만 저장됩니다.
             </p>
           </div>
-          <p className="mt-2 text-xs font-bold text-rose-600">첨부 파일에도 실제 개인정보, 건강정보, 민감정보를 넣지 마세요. 게시글은 저장되고, 새로고침 후 첨부파일 원본은 파일명만 남습니다.</p>
+          <p className="mt-2 text-xs font-bold text-rose-600">첨부 파일에도 실제 개인정보, 건강정보, 민감정보를 넣지 마세요. 게시글은 저장되고, 같은 브라우저에서는 관리자만 원본을 보거나 삭제할 수 있습니다.</p>
           {attachmentError ? <p className="mt-2 rounded-2xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800">{attachmentError}</p> : null}
           {pendingAttachments.length ? (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -445,6 +504,10 @@ export default function TrainingQuestionBoard({ compact = false }: TrainingQuest
                               ) : null}
                               <button type="button" onClick={() => void downloadAttachment(attachment)} className="rounded-xl bg-white px-2 py-1 text-slate-600">
                                 다운로드
+                              </button>
+                              <button type="button" onClick={() => void deleteAttachment(item.id, attachment.id)} className="inline-flex items-center gap-1 rounded-xl bg-rose-50 px-2 py-1 text-rose-700">
+                                <Trash2 className="h-3.5 w-3.5" />
+                                첨부 삭제
                               </button>
                             </>
                           ) : (
