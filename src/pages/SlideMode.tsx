@@ -2,6 +2,7 @@ import { BookOpen, ExternalLink, Maximize2, Menu, PanelRightClose, PanelRightOpe
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AgentOrchestrator from "../components/AgentOrchestrator";
 import DeckShell from "../components/DeckShell";
+import { FOLLOW_LOCATION_CHANGE_EVENT } from "../components/GlobalFollowControl";
 import PresentationToolLayer from "../components/PresentationToolLayer";
 import PresenterNotes from "../components/PresenterNotes";
 import SlideFrame from "../components/SlideFrame";
@@ -39,6 +40,7 @@ export default function SlideMode() {
     const next = new URL(window.location.href);
     next.searchParams.set("s", String(safe + 1));
     window.history.replaceState(null, "", next);
+    window.dispatchEvent(new Event(FOLLOW_LOCATION_CHANGE_EVENT));
   }, []);
 
   const next = useCallback(() => goTo(index + 1), [goTo, index]);
@@ -134,7 +136,12 @@ export default function SlideMode() {
               ← → Space · F · M · N · D · 2 · 3 · 4
             </div>
           </div>
-          <div ref={slideViewportRef} className="slide-viewport slide-fullscreen-surface scrollbar-soft overflow-auto rounded-[32px] border border-white/80 bg-white/68 p-5 shadow-card">
+          <div
+            ref={slideViewportRef}
+            id={slide.id}
+            data-follow-section
+            className="slide-viewport slide-fullscreen-surface scrollbar-soft overflow-auto rounded-[32px] border border-white/80 bg-white/68 p-5 shadow-card"
+          >
             {isAdmin ? (
               <PresentationToolLayer className="h-full min-h-full" contentClassName="h-full">
                 <SlideFrame slide={slide} dense />

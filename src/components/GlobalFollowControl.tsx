@@ -39,6 +39,8 @@ declare global {
 const EVENT_NAME = "teacher-page";
 const PENDING_KEY = "edu2-teacher-page-pending";
 const FOLLOW_KEY_PREFIX = "edu2-follow-mode:";
+const TEACHER_MODE_KEY_PREFIX = "edu2-teacher-mode:";
+export const FOLLOW_LOCATION_CHANGE_EVENT = "edu2-follow-location-change";
 
 function queryParams() {
   return new URLSearchParams(window.location.search);
@@ -47,6 +49,22 @@ function queryParams() {
 function roomFromLocation() {
   const params = queryParams();
   return (params.get("room") || window.EDU2_REALTIME_CONFIG?.defaultRoom || "codex-class").replace(/[^\w-]/g, "").slice(0, 60) || "codex-class";
+}
+
+function sessionFlag(key: string) {
+  try {
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setSessionFlag(key: string, value: boolean) {
+  try {
+    sessionStorage.setItem(key, value ? "1" : "0");
+  } catch {
+    // Session storage can be unavailable in restricted browser modes.
+  }
 }
 
 function isHostCandidate() {
@@ -155,10 +173,11 @@ export default function GlobalFollowControl() {
   const shouldPreserveTeacherContext = isAdmin || isHostCandidate();
   const roomRef = useRef(roomFromLocation());
   const followStorageKey = `${FOLLOW_KEY_PREFIX}${roomRef.current}`;
+  const teacherStorageKey = `${TEACHER_MODE_KEY_PREFIX}${roomRef.current}`;
   const [connected, setConnected] = useState(false);
-  const [followMode, setFollowMode] = useState(() => sessionStorage.getItem(followStorageKey) === "1");
+  const [followMode, setFollowMode] = useState(() => sessionFlag(followStorageKey));
   const [adminOpen, setAdminOpen] = useState(() => isAdmin);
-  const [teacherMode, setTeacherMode] = useState(false);
+  const [teacherMode, setTeacherMode] = useState(() => sessionFlag(teacherStorageKey));
   const [status, setStatus] = useState("연결 준비 중");
   const channelRef = useRef<ReturnType<SupabaseClient["channel"]> | null>(null);
   const followModeRef = useRef(followMode);
@@ -170,12 +189,13 @@ export default function GlobalFollowControl() {
 
   useEffect(() => {
     followModeRef.current = followMode;
-    sessionStorage.setItem(followStorageKey, followMode ? "1" : "0");
+    setSessionFlag(followStorageKey, followMode);
   }, [followMode, followStorageKey]);
 
   useEffect(() => {
     teacherModeRef.current = teacherMode;
-  }, [teacherMode]);
+    setSessionFlag(teacherStorageKey, teacherMode);
+  }, [teacherMode, teacherStorageKey]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -310,6 +330,7 @@ export default function GlobalFollowControl() {
     window.addEventListener("keyup", scheduleSectionCheck);
     window.addEventListener("click", scheduleSectionCheck);
     window.addEventListener("hashchange", scheduleSectionCheck);
+    window.addEventListener(FOLLOW_LOCATION_CHANGE_EVENT, scheduleSectionCheck);
     void sendCurrentPage(true);
 
     return () => {
@@ -318,6 +339,7 @@ export default function GlobalFollowControl() {
       window.removeEventListener("keyup", scheduleSectionCheck);
       window.removeEventListener("click", scheduleSectionCheck);
       window.removeEventListener("hashchange", scheduleSectionCheck);
+      window.removeEventListener(FOLLOW_LOCATION_CHANGE_EVENT, scheduleSectionCheck);
     };
   }, [isAdmin, teacherMode]);
 
