@@ -30,7 +30,7 @@ export default function DeckShell({ children, progress = 0, mode = "home", botto
   return (
     <div className="lecture-bg min-h-screen text-slate-900">
       <GlobalFollowControl />
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/78 px-4 py-3 shadow-sm backdrop-blur-2xl">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white px-4 py-3 shadow-[0_8px_26px_rgba(15,23,42,0.06)]">
         <div className="mx-auto flex max-w-[1720px] items-center justify-between gap-4">
           <a href="/" className="flex min-w-0 items-center gap-3">
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-400 via-violet-500 to-cyan-300 text-white shadow-glow">
