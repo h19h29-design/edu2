@@ -23,6 +23,7 @@ const navItems = [
 export default function DeckShell({ children, progress = 0, mode = "home", bottom, className }: DeckShellProps) {
   return (
     <div className="lecture-bg min-h-screen text-slate-900">
+      <GlobalFollowControl />
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/78 px-4 py-3 shadow-sm backdrop-blur-2xl">
         <div className="mx-auto flex max-w-[1720px] items-center justify-between gap-4">
           <a href="/" className="flex min-w-0 items-center gap-3">
@@ -59,7 +60,6 @@ export default function DeckShell({ children, progress = 0, mode = "home", botto
             })}
           </nav>
           <div className="flex items-center gap-3">
-            <GlobalFollowControl />
             <button className="relative rounded-2xl bg-white p-3 shadow-sm">
               <Bell className="h-5 w-5 text-slate-600" />
               <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-rose-500" />

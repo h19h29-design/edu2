@@ -2,27 +2,23 @@ import clsx from "clsx";
 import { Eye, EyeOff, MonitorPlay } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+type TeacherPagePayload = {
+  type: "teacher_page";
+  room: string;
+  pageId: string;
+  seq: number;
+  timestamp: number;
+  scrollY?: number;
+};
+
 type SupabaseChannel = {
-  on: (type: "broadcast", filter: { event: string }, callback: (message: { payload?: FollowPayload }) => void) => SupabaseChannel;
+  on: (type: "broadcast", filter: { event: string }, callback: (message: { payload?: TeacherPagePayload }) => void) => SupabaseChannel;
   subscribe: (callback: (status: string) => void) => void;
-  send: (message: { type: "broadcast"; event: string; payload: FollowPayload }) => Promise<unknown>;
+  send: (message: { type: "broadcast"; event: string; payload: TeacherPagePayload }) => Promise<unknown>;
 };
 
 type SupabaseClient = {
-  channel: (
-    name: string,
-    options?: { config?: { broadcast?: { self?: boolean } } },
-  ) => SupabaseChannel;
-};
-
-type FollowPayload = {
-  room: string;
-  pathname: string;
-  search: string;
-  hash: string;
-  sectionId: string;
-  scrollY: number;
-  timestamp: number;
+  channel: (name: string, options?: { config?: { broadcast?: { self?: boolean } } }) => SupabaseChannel;
 };
 
 declare global {
@@ -39,7 +35,10 @@ declare global {
   }
 }
 
-const PENDING_FOLLOW_KEY = "edu2-global-follow-pending";
+const ADMIN_SEQUENCE = "1015";
+const EVENT_NAME = "teacher-page";
+const PENDING_KEY = "edu2-teacher-page-pending";
+const FOLLOW_KEY_PREFIX = "edu2-follow-mode:";
 
 function queryParams() {
   return new URLSearchParams(window.location.search);
@@ -50,11 +49,11 @@ function roomFromLocation() {
   return (params.get("room") || window.EDU2_REALTIME_CONFIG?.defaultRoom || "codex-class").replace(/[^\w-]/g, "").slice(0, 60) || "codex-class";
 }
 
-function isHostMode() {
+function isHostCandidate() {
   return queryParams().get("role") === "host";
 }
 
-function targetSearchForBroadcast() {
+function publicSearch() {
   const params = queryParams();
   params.delete("role");
   params.delete("room");
@@ -62,80 +61,133 @@ function targetSearchForBroadcast() {
   return value ? `?${value}` : "";
 }
 
+function isVisible(node: HTMLElement) {
+  const rect = node.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0 && rect.bottom >= 0 && rect.top <= window.innerHeight;
+}
+
 function currentSectionId() {
-  const candidates = Array.from(document.querySelectorAll<HTMLElement>("[id]")).filter((node) => node.offsetParent !== null);
+  const selectors = ["[data-follow-section][id]", "main section[id]", "article[id]", "section[id]", "[id]"];
+  const nodes = selectors.flatMap((selector) => Array.from(document.querySelectorAll<HTMLElement>(selector)));
+  const uniqueNodes = Array.from(new Set(nodes)).filter((node) => {
+    if (!node.id || node.id === "root" || node.closest("[data-follow-control]")) return false;
+    return isVisible(node);
+  });
+
+  const viewportCenter = window.innerHeight / 2;
   let selected = "";
-  let best = Number.NEGATIVE_INFINITY;
-  for (const node of candidates) {
-    const top = node.getBoundingClientRect().top;
-    if (top <= 140 && top > best) {
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (const node of uniqueNodes) {
+    const rect = node.getBoundingClientRect();
+    const distance = Math.abs(rect.top + rect.height / 2 - viewportCenter);
+    if (distance < bestDistance) {
       selected = node.id;
-      best = top;
+      bestDistance = distance;
     }
   }
   return selected;
 }
 
-function currentPayload(room: string): FollowPayload {
+function currentPageId() {
+  const sectionId = currentSectionId();
+  return `${window.location.pathname}${publicSearch()}${sectionId ? `#${sectionId}` : ""}`;
+}
+
+function currentPayload(room: string, seq: number): TeacherPagePayload {
   return {
+    type: "teacher_page",
     room,
-    pathname: window.location.pathname,
-    search: targetSearchForBroadcast(),
-    hash: window.location.hash,
-    sectionId: currentSectionId(),
-    scrollY: Math.round(window.scrollY || 0),
+    pageId: currentPageId(),
+    seq,
     timestamp: Date.now(),
+    scrollY: Math.round(window.scrollY || 0),
   };
-}
-
-function applyScroll(payload: FollowPayload) {
-  const target = payload.sectionId ? document.getElementById(payload.sectionId) : null;
-  if (target) {
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.setTimeout(() => window.scrollTo({ top: Number(payload.scrollY) || 0, behavior: "smooth" }), 120);
-    return;
-  }
-  window.scrollTo({ top: Number(payload.scrollY) || 0, behavior: "smooth" });
-}
-
-function normalizeTargetUrl(payload: FollowPayload, room: string) {
-  const params = new URLSearchParams(payload.search || "");
-  params.set("room", room);
-  const search = params.toString();
-  return `${payload.pathname}${search ? `?${search}` : ""}${payload.hash || ""}`;
 }
 
 function isEditableTarget(target: EventTarget | null) {
   const element = target as HTMLElement | null;
-  return element?.tagName === "INPUT" || element?.tagName === "TEXTAREA" || element?.tagName === "SELECT" || Boolean(element?.isContentEditable);
+  return (
+    element?.tagName === "INPUT" ||
+    element?.tagName === "TEXTAREA" ||
+    element?.tagName === "SELECT" ||
+    Boolean(element?.isContentEditable)
+  );
+}
+
+function targetUrlFromPageId(pageId: string, room: string) {
+  const url = new URL(pageId || window.location.pathname, window.location.origin);
+  url.searchParams.set("room", room);
+  return url;
+}
+
+function normalizedParams(url: URL) {
+  const params = new URLSearchParams(url.search);
+  params.delete("role");
+  params.delete("room");
+  return Array.from(params.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+}
+
+function isSamePage(url: URL) {
+  const current = new URL(window.location.href);
+  return url.pathname === current.pathname && normalizedParams(url) === normalizedParams(current);
+}
+
+function applyTeacherPage(payload: TeacherPagePayload) {
+  const url = targetUrlFromPageId(payload.pageId, payload.room);
+  const targetId = decodeURIComponent(url.hash.replace(/^#/, ""));
+  if (targetId) {
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.scrollIntoView({ behavior: "auto", block: "start" });
+      return;
+    }
+  }
+  if (typeof payload.scrollY === "number") {
+    window.scrollTo({ top: payload.scrollY, behavior: "auto" });
+  }
 }
 
 export default function GlobalFollowControl() {
-  const [followMode, setFollowMode] = useState(false);
-  const [connected, setConnected] = useState(false);
-  const [status, setStatus] = useState("연결 준비 중");
+  const isHost = isHostCandidate();
   const roomRef = useRef(roomFromLocation());
-  const isHost = isHostMode();
+  const followStorageKey = `${FOLLOW_KEY_PREFIX}${roomRef.current}`;
+  const [connected, setConnected] = useState(false);
+  const [followMode, setFollowMode] = useState(() => sessionStorage.getItem(followStorageKey) === "1");
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [teacherMode, setTeacherMode] = useState(false);
+  const [status, setStatus] = useState("연결 준비 중");
   const channelRef = useRef<ReturnType<SupabaseClient["channel"]> | null>(null);
-  const lastSentRef = useRef(0);
-  const followModeRef = useRef(false);
+  const followModeRef = useRef(followMode);
+  const teacherModeRef = useRef(false);
   const connectedRef = useRef(false);
+  const seqRef = useRef(0);
+  const lastHandledSeqRef = useRef(0);
+  const lastSentPageRef = useRef("");
+  const keyBufferRef = useRef("");
 
   useEffect(() => {
     followModeRef.current = followMode;
-  }, [followMode]);
+    sessionStorage.setItem(followStorageKey, followMode ? "1" : "0");
+  }, [followMode, followStorageKey]);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem(PENDING_FOLLOW_KEY);
-    if (!raw) return;
-    sessionStorage.removeItem(PENDING_FOLLOW_KEY);
+    teacherModeRef.current = teacherMode;
+  }, [teacherMode]);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem(PENDING_KEY);
+    if (!raw || !followModeRef.current) return;
+    sessionStorage.removeItem(PENDING_KEY);
     window.setTimeout(() => {
       try {
-        applyScroll(JSON.parse(raw) as FollowPayload);
+        applyTeacherPage(JSON.parse(raw) as TeacherPagePayload);
       } catch {
-        // Ignore stale or malformed pending follow state.
+        // Malformed pending payloads should never block normal reading.
       }
-    }, 350);
+    }, 100);
   }, []);
 
   useEffect(() => {
@@ -143,61 +195,66 @@ export default function GlobalFollowControl() {
     const url = config?.supabaseUrl?.trim();
     const key = (config?.supabaseAnonKey || config?.supabasePublishableKey || "").trim();
     if (!url || !key || !window.supabase?.createClient) {
-      setStatus("Supabase 설정 후 활성화됩니다.");
+      setStatus("Realtime 설정 없음");
       return;
     }
 
-    const client = window.supabase.createClient(url, key);
-    const channel = client.channel(`edu2-global-follow:${roomRef.current}`, { config: { broadcast: { self: false } } });
-    channelRef.current = channel;
-    channel.on("broadcast", { event: "host-screen" }, (message) => {
-      const payload = message.payload;
-      if (!payload || payload.room !== roomRef.current || !followModeRef.current) return;
-      const targetUrl = normalizeTargetUrl(payload, roomRef.current);
-      const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-      if (targetUrl !== currentUrl) {
-        sessionStorage.setItem(PENDING_FOLLOW_KEY, JSON.stringify(payload));
-        window.location.href = targetUrl;
+    try {
+      const client = window.supabase.createClient(url, key);
+      const channel = client.channel(`edu2-teacher-page:${roomRef.current}`, { config: { broadcast: { self: false } } });
+      channelRef.current = channel;
+      channel.on("broadcast", { event: EVENT_NAME }, (message) => {
+        const payload = message.payload;
+        if (!payload || payload.type !== "teacher_page" || payload.room !== roomRef.current) return;
+        if (!followModeRef.current || payload.seq <= lastHandledSeqRef.current) return;
+        lastHandledSeqRef.current = payload.seq;
+
+        const targetUrl = targetUrlFromPageId(payload.pageId, roomRef.current);
+        if (!isSamePage(targetUrl)) {
+          sessionStorage.setItem(PENDING_KEY, JSON.stringify(payload));
+          window.location.href = targetUrl.toString();
+          return;
+        }
+        applyTeacherPage(payload);
+      });
+      channel.subscribe((nextStatus) => {
+        if (nextStatus === "SUBSCRIBED") {
+          setConnected(true);
+          connectedRef.current = true;
+          setStatus(`room: ${roomRef.current}`);
+        }
+        if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(nextStatus)) {
+          setConnected(false);
+          connectedRef.current = false;
+          setStatus("Realtime 연결 오류");
+        }
+      });
+    } catch {
+      setStatus("Realtime 연결 오류");
+    }
+  }, []);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (isEditableTarget(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.key === "Escape" && followModeRef.current) {
+        setFollowMode(false);
         return;
       }
-      applyScroll(payload);
-    });
-    channel.subscribe((nextStatus) => {
-      if (nextStatus === "SUBSCRIBED") {
-        setConnected(true);
-        connectedRef.current = true;
-        setStatus(`room: ${roomRef.current}`);
+      if (!isHost || !/^\d$/.test(event.key)) return;
+      keyBufferRef.current = `${keyBufferRef.current}${event.key}`.slice(-ADMIN_SEQUENCE.length);
+      if (keyBufferRef.current === ADMIN_SEQUENCE) {
+        setAdminOpen(true);
+        keyBufferRef.current = "";
       }
-      if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(nextStatus)) {
-        setConnected(false);
-        connectedRef.current = false;
-        setStatus("Realtime 연결을 확인하세요.");
-      }
-    });
-  }, []);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isHost]);
 
   useEffect(() => {
     if (!isHost) return;
 
-    const sendState = async (force = false) => {
-      if (!connectedRef.current) return;
-      const now = Date.now();
-      if (!force && now - lastSentRef.current < 700) return;
-      lastSentRef.current = now;
-      try {
-        await channelRef.current?.send({
-          type: "broadcast",
-          event: "host-screen",
-          payload: currentPayload(roomRef.current),
-        });
-        setStatus(`room: ${roomRef.current}`);
-      } catch {
-        setStatus("송출 오류");
-      }
-    };
-
-    const onScroll = () => void sendState();
-    const scheduleSend = () => window.setTimeout(() => void sendState(true), 80);
     const preserveHostLinks = (event: MouseEvent) => {
       if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = (event.target as HTMLElement | null)?.closest("a[href]") as HTMLAnchorElement | null;
@@ -210,54 +267,132 @@ export default function GlobalFollowControl() {
       window.location.href = next.toString();
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("click", scheduleSend);
-    window.addEventListener("keyup", scheduleSend);
     document.addEventListener("click", preserveHostLinks, true);
-    const interval = window.setInterval(() => void sendState(), 1200);
-    void sendState(true);
-
-    return () => {
-      window.clearInterval(interval);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("click", scheduleSend);
-      window.removeEventListener("keyup", scheduleSend);
-      document.removeEventListener("click", preserveHostLinks, true);
-    };
+    return () => document.removeEventListener("click", preserveHostLinks, true);
   }, [isHost]);
 
   useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && followModeRef.current && !isEditableTarget(event.target)) {
-        setFollowMode(false);
+    if (!isHost || !teacherMode) return;
+
+    const sendCurrentPage = async (force = false) => {
+      if (!channelRef.current || !connectedRef.current || !teacherModeRef.current) return;
+      const pageId = currentPageId();
+      if (!force && pageId === lastSentPageRef.current) return;
+      lastSentPageRef.current = pageId;
+      seqRef.current += 1;
+      try {
+        await channelRef.current.send({
+          type: "broadcast",
+          event: EVENT_NAME,
+          payload: currentPayload(roomRef.current, seqRef.current),
+        });
+        setStatus(`송출 중 · ${roomRef.current}`);
+      } catch {
+        setStatus("송출 오류");
       }
+    };
+
+    const scheduleSectionCheck = () => window.setTimeout(() => void sendCurrentPage(false), 80);
+    const heartbeat = window.setInterval(() => void sendCurrentPage(true), 2500);
+    window.addEventListener("scroll", scheduleSectionCheck, { passive: true });
+    window.addEventListener("keyup", scheduleSectionCheck);
+    window.addEventListener("click", scheduleSectionCheck);
+    window.addEventListener("hashchange", scheduleSectionCheck);
+    void sendCurrentPage(true);
+
+    return () => {
+      window.clearInterval(heartbeat);
+      window.removeEventListener("scroll", scheduleSectionCheck);
+      window.removeEventListener("keyup", scheduleSectionCheck);
+      window.removeEventListener("click", scheduleSectionCheck);
+      window.removeEventListener("hashchange", scheduleSectionCheck);
+    };
+  }, [isHost, teacherMode]);
+
+  const sendNow = async () => {
+    if (!channelRef.current || !connectedRef.current) return;
+    seqRef.current += 1;
+    lastSentPageRef.current = currentPageId();
+    try {
+      await channelRef.current.send({
+        type: "broadcast",
+        event: EVENT_NAME,
+        payload: currentPayload(roomRef.current, seqRef.current),
+      });
+      setStatus(`송출 중 · ${roomRef.current}`);
+    } catch {
+      setStatus("송출 오류");
     }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  };
 
   if (isHost) {
     return (
-      <div className="hidden items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 shadow-sm md:flex">
-        <MonitorPlay className="h-4 w-4" />
-        강사 모드 송출 중
+      <div data-follow-control>
+        {teacherMode && !adminOpen ? (
+          <div className="fixed bottom-24 right-4 z-50 flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 shadow-card">
+            <MonitorPlay className="h-4 w-4" />
+            강사 모드 송출 중
+          </div>
+        ) : null}
+        {adminOpen ? (
+          <div className="fixed bottom-24 right-4 z-[60] w-[min(320px,calc(100vw-2rem))] rounded-3xl border border-slate-200 bg-white p-3 shadow-card">
+            <div className="grid gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setTeacherMode(true);
+                  void sendNow();
+                }}
+                disabled={!connected}
+                className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:bg-slate-300"
+              >
+                강사모드 켜기
+              </button>
+              <button
+                type="button"
+                onClick={() => setTeacherMode(false)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800"
+              >
+                강사모드 끄기
+              </button>
+              <button
+                type="button"
+                onClick={() => void sendNow()}
+                disabled={!connected || !teacherMode}
+                className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+              >
+                현재 페이지 보내기
+              </button>
+              <button
+                type="button"
+                onClick={() => setAdminOpen(false)}
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-700"
+              >
+                관리자 패널 닫기
+              </button>
+            </div>
+            <p className="mt-2 text-center text-[11px] font-bold text-slate-400">{status}</p>
+          </div>
+        ) : null}
       </div>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => setFollowMode((current) => !current)}
-      disabled={!connected}
-      title={status}
-      className={clsx(
-        "inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-black shadow-sm transition disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400",
-        followMode ? "border-slate-900 bg-slate-950 text-white" : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100",
-      )}
-    >
-      {followMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-      {followMode ? "따라보기 종료" : "강사화면 보기"}
-    </button>
+    <div data-follow-control className="fixed bottom-24 right-4 z-50">
+      <button
+        type="button"
+        onClick={() => setFollowMode((current) => !current)}
+        disabled={!connected}
+        title={status}
+        className={clsx(
+          "inline-flex items-center gap-2 rounded-full border px-4 py-3 text-sm font-black shadow-card transition disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400",
+          followMode ? "border-slate-900 bg-slate-950 text-white" : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100",
+        )}
+      >
+        {followMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        {followMode ? "자유보기" : "강사화면 보기"}
+      </button>
+    </div>
   );
 }
