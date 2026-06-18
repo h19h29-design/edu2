@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Eye, EyeOff, MonitorPlay } from "lucide-react";
+import { Eye, EyeOff, Loader2, MonitorPlay } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ADMIN_EVENT, useAdminUnlock } from "../hooks/useAdminUnlock";
 
@@ -19,7 +19,7 @@ type SupabaseChannel = {
 };
 
 type SupabaseClient = {
-  channel: (name: string, options?: { config?: { broadcast?: { self?: boolean } } }) => SupabaseChannel;
+  channel: (name: string, options?: { config?: { broadcast?: { self?: boolean; ack?: boolean } } }) => SupabaseChannel;
 };
 
 declare global {
@@ -40,6 +40,9 @@ const EVENT_NAME = "teacher-page";
 const PENDING_KEY = "edu2-teacher-page-pending";
 const FOLLOW_KEY_PREFIX = "edu2-follow-mode:";
 const TEACHER_MODE_KEY_PREFIX = "edu2-teacher-mode:";
+const MIN_SEND_LOADING_MS = 350;
+const MANUAL_SEND_REPEATS = 3;
+const MANUAL_SEND_RETRY_DELAY_MS = 120;
 export const FOLLOW_LOCATION_CHANGE_EVENT = "edu2-follow-location-change";
 
 function queryParams() {
@@ -168,6 +171,36 @@ function applyTeacherPage(payload: TeacherPagePayload) {
   }
 }
 
+function wait(ms: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+async function sendBroadcast(channel: SupabaseChannel, payload: TeacherPagePayload, repeats = 1) {
+  let sent = false;
+  let lastError: unknown;
+
+  for (let index = 0; index < repeats; index += 1) {
+    try {
+      await channel.send({
+        type: "broadcast",
+        event: EVENT_NAME,
+        payload,
+      });
+      sent = true;
+    } catch (error) {
+      lastError = error;
+    }
+
+    if (index < repeats - 1) {
+      await wait(MANUAL_SEND_RETRY_DELAY_MS);
+    }
+  }
+
+  if (!sent) throw lastError;
+}
+
 export default function GlobalFollowControl() {
   const { isAdmin } = useAdminUnlock();
   const shouldPreserveTeacherContext = isAdmin || isHostCandidate();
@@ -178,13 +211,16 @@ export default function GlobalFollowControl() {
   const [followMode, setFollowMode] = useState(() => sessionFlag(followStorageKey));
   const [adminOpen, setAdminOpen] = useState(() => isAdmin);
   const [teacherMode, setTeacherMode] = useState(() => sessionFlag(teacherStorageKey));
+  const [sending, setSending] = useState(false);
   const [status, setStatus] = useState("연결 준비 중");
   const channelRef = useRef<ReturnType<SupabaseClient["channel"]> | null>(null);
   const followModeRef = useRef(followMode);
   const teacherModeRef = useRef(false);
   const connectedRef = useRef(false);
+  const sendingRef = useRef(false);
   const seqRef = useRef(0);
   const lastHandledSeqRef = useRef(0);
+  const lastHandledTimestampRef = useRef(0);
   const lastSentPageRef = useRef("");
 
   useEffect(() => {
@@ -228,12 +264,17 @@ export default function GlobalFollowControl() {
 
     try {
       const client = window.supabase.createClient(url, key);
-      const channel = client.channel(`edu2-teacher-page:${roomRef.current}`, { config: { broadcast: { self: false } } });
+      const channel = client.channel(`edu2-teacher-page:${roomRef.current}`, { config: { broadcast: { self: false, ack: true } } });
       channelRef.current = channel;
       channel.on("broadcast", { event: EVENT_NAME }, (message) => {
         const payload = message.payload;
         if (!payload || payload.type !== "teacher_page" || payload.room !== roomRef.current) return;
-        if (!followModeRef.current || payload.seq <= lastHandledSeqRef.current) return;
+        if (!followModeRef.current) return;
+        const timestamp = Number(payload.timestamp) || 0;
+        if (timestamp && timestamp < lastHandledTimestampRef.current) return;
+        if (timestamp && timestamp === lastHandledTimestampRef.current && payload.seq <= lastHandledSeqRef.current) return;
+        if (!timestamp && payload.seq <= lastHandledSeqRef.current) return;
+        lastHandledTimestampRef.current = timestamp || Date.now();
         lastHandledSeqRef.current = payload.seq;
 
         const targetUrl = targetUrlFromPageId(payload.pageId, roomRef.current);
@@ -312,12 +353,9 @@ export default function GlobalFollowControl() {
       if (!force && pageId === lastSentPageRef.current) return;
       lastSentPageRef.current = pageId;
       seqRef.current += 1;
+      const payload = currentPayload(roomRef.current, seqRef.current);
       try {
-        await channelRef.current.send({
-          type: "broadcast",
-          event: EVENT_NAME,
-          payload: currentPayload(roomRef.current, seqRef.current),
-        });
+        await sendBroadcast(channelRef.current, payload);
         setStatus(`송출 중 · ${roomRef.current}`);
       } catch {
         setStatus("송출 오류");
@@ -344,18 +382,35 @@ export default function GlobalFollowControl() {
   }, [isAdmin, teacherMode]);
 
   const sendNow = async () => {
-    if (!channelRef.current || !connectedRef.current) return;
+    if (sendingRef.current) return;
+    if (!channelRef.current || !connectedRef.current) {
+      setStatus("Realtime 연결 대기 중");
+      return;
+    }
+    const startedAt = Date.now();
+    sendingRef.current = true;
+    setSending(true);
+    if (!teacherModeRef.current) {
+      teacherModeRef.current = true;
+      setSessionFlag(teacherStorageKey, true);
+      setTeacherMode(true);
+    }
     seqRef.current += 1;
-    lastSentPageRef.current = currentPageId();
+    const payload = currentPayload(roomRef.current, seqRef.current);
+    lastSentPageRef.current = payload.pageId;
+    setStatus("현재 페이지 전달 중");
     try {
-      await channelRef.current.send({
-        type: "broadcast",
-        event: EVENT_NAME,
-        payload: currentPayload(roomRef.current, seqRef.current),
-      });
-      setStatus(`송출 중 · ${roomRef.current}`);
+      await sendBroadcast(channelRef.current, payload, MANUAL_SEND_REPEATS);
+      setStatus(`전달 완료 · ${roomRef.current}`);
     } catch {
       setStatus("송출 오류");
+    } finally {
+      const remaining = MIN_SEND_LOADING_MS - (Date.now() - startedAt);
+      if (remaining > 0) {
+        await wait(remaining);
+      }
+      sendingRef.current = false;
+      setSending(false);
     }
   };
 
@@ -377,7 +432,7 @@ export default function GlobalFollowControl() {
                   setTeacherMode(true);
                   void sendNow();
                 }}
-                disabled={!connected}
+                disabled={!connected || sending}
                 className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:bg-slate-300"
               >
                 강사모드 켜기
@@ -392,10 +447,11 @@ export default function GlobalFollowControl() {
               <button
                 type="button"
                 onClick={() => void sendNow()}
-                disabled={!connected || !teacherMode}
-                className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+                disabled={!connected || sending}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
               >
-                현재 페이지 보내기
+                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MonitorPlay className="h-4 w-4" />}
+                {sending ? "전달 중..." : "현재 페이지 전달"}
               </button>
               <button
                 type="button"
