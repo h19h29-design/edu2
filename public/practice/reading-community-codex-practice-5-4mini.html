@@ -677,6 +677,7 @@ Supabase Auth의 signInWithOAuth 기능을 사용한다.
 <script>
 const toast=document.getElementById('toast');
 const storageKey=id=>`reading-community-prompt:${id}`;
+let promptEditingUnlocked=false;
 const showToast=message=>{
   toast.textContent=message;
   toast.classList.add('show');
@@ -741,6 +742,8 @@ document.querySelectorAll('[data-copy]').forEach(btn=>{
   editBtn.className='edit-btn';
   editBtn.dataset.edit=btn.dataset.copy;
   editBtn.textContent='수정';
+  editBtn.disabled=true;
+  editBtn.setAttribute('aria-hidden','true');
   actions.insertBefore(editBtn,btn);
 });
 document.querySelectorAll('pre[id]').forEach(pre=>{
@@ -753,6 +756,10 @@ document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('clic
   catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(btn.dataset.copy));const s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨';showToast('프롬프트가 선택되었습니다.');}
 }));
 document.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(!promptEditingUnlocked){
+    showToast('관리자 모드에서만 수정할 수 있습니다.');
+    return;
+  }
   const id=btn.dataset.edit;
   const pre=document.getElementById(id);
   const prompt=pre.closest('.prompt');
@@ -775,6 +782,10 @@ document.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('clic
   btn.after(save);
   textarea.focus();
   save.addEventListener('click',()=>{
+    if(!promptEditingUnlocked){
+      showToast('관리자 모드에서만 저장할 수 있습니다.');
+      return;
+    }
     setPromptText(id,textarea.value);
     localStorage.setItem(storageKey(id),textarea.value);
     textarea.remove();
@@ -812,7 +823,12 @@ document.addEventListener('keydown',event=>{
   if(!/^\d$/.test(event.key)) return;
   editSequence=(editSequence+event.key).slice(-ADMIN_SEQUENCE.length);
   if(editSequence===ADMIN_SEQUENCE){
+    promptEditingUnlocked=true;
     document.body.classList.add('editing-enabled');
+    document.querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.disabled=false;
+      btn.removeAttribute('aria-hidden');
+    });
     window.dispatchEvent(new CustomEvent('edu2-admin-unlocked'));
     showToast('프롬프트 수정 버튼이 열렸습니다.');
     editSequence='';
