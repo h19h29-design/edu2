@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { BookOpenCheck, Download, ExternalLink, ImageDown, LayoutPanelTop, MonitorPlay } from "lucide-react";
 import DeckShell from "../components/DeckShell";
 import {
@@ -16,6 +17,10 @@ type PracticeAction = {
   download?: string;
   rel?: string;
   target?: "_blank";
+};
+
+type PracticeFrameWindow = Window & {
+  edu2DownloadEditedPracticeHtml?: () => boolean;
 };
 
 // These arrays keep the page editable for future lecture-material swaps.
@@ -48,10 +53,31 @@ const practiceActions: PracticeAction[] = [
 const practiceTips = [
   "방향키, Space, Home, End로 단계 페이지처럼 넘길 수 있습니다.",
   "전체화면 모드는 실습 HTML 안에서 별도로 동작합니다.",
-  "실습 HTML 자체를 바꾸려면 public/practice 파일과 practiceAssets 상수를 함께 수정하면 됩니다.",
+  "HTML 다운로드는 iframe 안에서 저장한 프롬프트 수정본을 우선 내려받습니다.",
 ] as const;
 
 export default function PracticeModePage() {
+  const practiceFrameRef = useRef<HTMLIFrameElement>(null);
+
+  function downloadStaticPracticeHtml() {
+    const link = document.createElement("a");
+    link.href = COMMUNITY_PRACTICE_HTML_PATH;
+    link.download = COMMUNITY_PRACTICE_HTML_FILE_NAME;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  function downloadCurrentPracticeHtml() {
+    try {
+      const frameWindow = practiceFrameRef.current?.contentWindow as PracticeFrameWindow | null;
+      if (frameWindow?.edu2DownloadEditedPracticeHtml?.()) return;
+    } catch {
+      // Cross-origin or not-yet-ready frames should still allow the original file download.
+    }
+    downloadStaticPracticeHtml();
+  }
+
   return (
     <DeckShell mode="practice" progress={100}>
       <div className="space-y-5">
@@ -63,19 +89,24 @@ export default function PracticeModePage() {
               </div>
               <p className="text-3xl font-black text-slate-950">독서커뮤니티 실습 모드</p>
               <div className="mt-5 flex flex-wrap gap-3">
-                {practiceActions.map(({ href, label, icon: Icon, className, download, rel, target }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target={target}
-                    rel={rel}
-                    download={download}
-                    className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white shadow-card ${className}`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {label}
-                  </a>
-                ))}
+                {practiceActions.map(({ href, label, icon: Icon, className, download, rel, target }) => {
+                  const actionClassName = `inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white shadow-card ${className}`;
+                  if (download === COMMUNITY_PRACTICE_HTML_FILE_NAME) {
+                    return (
+                      <button key={label} type="button" onClick={downloadCurrentPracticeHtml} className={actionClassName}>
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <a key={label} href={href} target={target} rel={rel} download={download} className={actionClassName}>
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </a>
+                  );
+                })}
               </div>
             </div>
             <div className="rounded-[28px] border border-white/70 bg-white/80 p-4 shadow-card">
@@ -110,6 +141,7 @@ export default function PracticeModePage() {
           </div>
           <div className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-card">
             <iframe
+              ref={practiceFrameRef}
               title={COMMUNITY_PRACTICE_IFRAME_TITLE}
               src={COMMUNITY_PRACTICE_HTML_PATH}
               className="h-[820px] w-full bg-white"

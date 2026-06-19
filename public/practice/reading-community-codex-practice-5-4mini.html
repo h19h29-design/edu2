@@ -19,7 +19,7 @@ table{width:100%;border-collapse:collapse;background:#fff;min-width:760px} .tabl
 .stage{overflow:hidden;position:relative} .stage:before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--mint),#60a5fa,#f9a8d4)} .stage-title{display:flex;gap:18px;margin-bottom:18px} .num{width:58px;height:58px;border-radius:20px;background:linear-gradient(135deg,#34d399,#60a5fa);color:white;font-size:26px;font-weight:1000;display:flex;align-items:center;justify-content:center;flex:0 0 auto} .stage small{color:var(--blue);font-weight:1000;text-transform:uppercase} .stage h2{margin:2px 0;font-size:30px;letter-spacing:-.05em} .stage-title p{margin:6px 0 0;color:var(--muted);line-height:1.6}
 .chips{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0} .chips div{padding:16px;border-radius:22px;border:1px solid #e2e8f0;background:#f8fafc} .chips div:first-child{background:#f0fdf4;border-color:#bbf7d0} .chips div:last-child{background:#eff6ff;border-color:#bfdbfe} .chips b{display:block;margin-bottom:6px} .chips span{color:#475569;line-height:1.5}.link-row{display:flex;flex-wrap:wrap;gap:8px}.link-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#2563eb;color:white;border-radius:14px;padding:10px 13px;font-size:14px;font-weight:1000;line-height:1.2}.link-button.secondary{background:#0f172a}
 .todo{background:#fff7ed;border:1px solid #fed7aa;border-radius:24px;padding:20px;margin-bottom:18px} .todo h3{margin:0 0 12px} .todo ol{margin:0;padding-left:22px;line-height:1.85}
-.prompt{background:#0f172a;border-radius:26px;overflow:hidden;box-shadow:0 16px 36px rgba(15,23,42,.16)} .prompt-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;background:#111827;color:white} .prompt-head span{display:inline-block;background:rgba(52,211,153,.16);border:1px solid rgba(52,211,153,.35);color:#bbf7d0;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;margin-right:8px} .prompt-head b{font-size:16px}.prompt-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px} button{border:0;border-radius:14px;background:#34d399;color:#052e16;padding:11px 16px;font-weight:1000;cursor:pointer}.edit-btn{display:none;background:#bfdbfe;color:#0f172a}.editing-enabled .edit-btn{display:inline-flex}.save-btn{background:#60a5fa;color:#082f49}.cancel-btn{background:#e2e8f0;color:#0f172a} pre{margin:0;padding:22px;max-height:560px;overflow:auto;color:#d1fae5;font-size:13px;line-height:1.65;white-space:pre-wrap;font-family:Consolas,"D2Coding",monospace}.prompt-editor{display:block;width:100%;min-height:460px;border:0;border-top:1px solid rgba(148,163,184,.25);background:#08111f;color:#d1fae5;padding:22px;font-size:13px;line-height:1.65;font-family:Consolas,"D2Coding",monospace;resize:vertical;outline:none}
+.prompt{background:#0f172a;border-radius:26px;overflow:hidden;box-shadow:0 16px 36px rgba(15,23,42,.16)} .prompt-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;background:#111827;color:white} .prompt-head span{display:inline-block;background:rgba(52,211,153,.16);border:1px solid rgba(52,211,153,.35);color:#bbf7d0;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;margin-right:8px} .prompt-head b{font-size:16px}.prompt-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px} button{border:0;border-radius:14px;background:#34d399;color:#052e16;padding:11px 16px;font-weight:1000;cursor:pointer}.edit-btn,.edit-only-btn{display:none;background:#bfdbfe;color:#0f172a}.editing-enabled .edit-btn,.editing-enabled .edit-only-btn{display:inline-flex}.save-btn{background:#60a5fa;color:#082f49}.cancel-btn{background:#e2e8f0;color:#0f172a}.download-edited-btn{background:#dbeafe;color:#1e3a8a} pre{margin:0;padding:22px;max-height:560px;overflow:auto;color:#d1fae5;font-size:13px;line-height:1.65;white-space:pre-wrap;font-family:Consolas,"D2Coding",monospace}.prompt-editor{display:block;width:100%;min-height:460px;border:0;border-top:1px solid rgba(148,163,184,.25);background:#08111f;color:#d1fae5;padding:22px;font-size:13px;line-height:1.65;font-family:Consolas,"D2Coding",monospace;resize:vertical;outline:none}
 .footer{background:#0f2a43;color:white;border-radius:30px;padding:26px;box-shadow:var(--shadow)} .footer p{line-height:1.7;color:rgba(255,255,255,.85)} .toast{position:fixed;right:20px;bottom:20px;background:#0f172a;color:white;padding:13px 16px;border-radius:16px;opacity:0;transform:translateY(8px);transition:.25s;box-shadow:var(--shadow);z-index:9} .toast.show{opacity:1;transform:translateY(0)}
 .follow-panel,.teacher-admin,.teacher-badge{position:fixed;right:18px;bottom:18px;z-index:30;border:1px solid rgba(15,23,42,.12);border-radius:18px;background:rgba(255,255,255,.94);box-shadow:0 18px 44px rgba(15,23,42,.18);backdrop-filter:blur(12px)}.follow-panel{display:flex;max-width:min(360px,calc(100vw - 36px));align-items:center;gap:10px;padding:10px 12px}.follow-panel[hidden],.teacher-admin[hidden],.teacher-badge[hidden]{display:none}.follow-panel button,.teacher-admin button{background:#2563eb;color:#fff;padding:10px 12px;font-size:13px}.follow-panel button:disabled,.teacher-admin button:disabled{cursor:not-allowed;background:#cbd5e1;color:#475569;box-shadow:none;filter:none}.follow-panel.following button{background:#0f172a}.follow-status{display:flex;min-width:0;flex-direction:column;gap:2px}.follow-status b{font-size:13px;color:#0f172a}.follow-status span{font-size:12px;font-weight:900;color:#64748b}.follow-panel.following .follow-status span{color:#2563eb}.follow-panel.error .follow-status span{color:#b45309}.teacher-admin{bottom:86px;display:grid;width:min(300px,calc(100vw - 36px));gap:8px;padding:12px}.teacher-admin button{width:100%;border-radius:14px}.teacher-admin .teacher-off,.teacher-admin .teacher-close{background:#f8fafc;color:#0f172a;border:1px solid #e2e8f0}.teacher-admin .teacher-send{background:#dbeafe;color:#1d4ed8}.teacher-admin .teacher-send.is-loading{position:relative;color:#1d4ed8}.teacher-admin .teacher-send.is-loading::before{content:"";display:inline-block;width:12px;height:12px;margin-right:7px;border:2px solid rgba(37,99,235,.25);border-top-color:#2563eb;border-radius:999px;vertical-align:-2px;animation:spin .75s linear infinite}.teacher-admin .teacher-send:disabled{background:#f1f5f9;color:#94a3b8}.teacher-badge{bottom:86px;padding:11px 14px;border-color:#bbf7d0;background:#ecfdf5;color:#047857;font-size:13px;font-weight:1000}
 .presentation-draw-layer{position:fixed;inset:0;z-index:19;pointer-events:none}.presentation-draw-layer.is-active{pointer-events:auto;touch-action:none}.presentation-draw-layer.is-draw{cursor:crosshair}.presentation-draw-layer.is-pointer{cursor:none}.presentation-draw-layer[hidden],.presentation-toolbox[hidden],.presentation-tool-menu[hidden],.presentation-pointer-dot[hidden]{display:none}.presentation-draw-layer svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.presentation-draw-layer polyline{fill:none;stroke:#ef4444;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 5px rgba(127,29,29,.22))}.presentation-pointer-dot{position:fixed;width:46px;height:46px;border:4px solid rgba(244,63,94,.92);border-radius:999px;background:rgba(251,113,133,.18);box-shadow:0 0 0 12px rgba(244,63,94,.13);transform:translate(-50%,-50%);pointer-events:none}.presentation-pointer-dot::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:999px;background:#e11d48;transform:translate(-50%,-50%)}.presentation-toolbox{position:fixed;right:18px;top:18px;z-index:80;display:flex;flex-direction:column;align-items:flex-end;gap:8px}.presentation-tool-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #e2e8f0;background:rgba(255,255,255,.96);color:#334155;border-radius:18px;padding:12px 14px;box-shadow:0 16px 38px rgba(15,23,42,.16);backdrop-filter:blur(12px)}.presentation-tool-menu{width:min(270px,calc(100vw - 36px));padding:14px;border:1px solid #e2e8f0;border-radius:24px;background:rgba(255,255,255,.97);box-shadow:0 24px 54px rgba(15,23,42,.2);backdrop-filter:blur(12px)}.presentation-tool-menu p{margin:0}.presentation-tool-menu .tool-title{font-size:14px;font-weight:1000;color:#0f172a}.presentation-tool-menu .tool-hint{margin-top:4px;font-size:12px;font-weight:800;color:#64748b;line-height:1.45}.presentation-tool-grid{display:grid;gap:8px;margin-top:12px}.presentation-tool-button{display:flex;align-items:center;justify-content:space-between;width:100%;border:1px solid #e2e8f0;background:#f8fafc;color:#334155;border-radius:18px;padding:12px 13px;text-align:left}.presentation-tool-button.active{border-color:#0f172a;background:#0f172a;color:white}.presentation-tool-button span:first-child{display:flex;flex-direction:column;gap:2px}.presentation-tool-button b{font-size:14px}.presentation-tool-button small{font-size:12px;font-weight:900;color:#64748b}.presentation-tool-button.active small{color:rgba(255,255,255,.72)}.presentation-tool-button kbd{border-radius:999px;background:#fff;color:#64748b;padding:4px 8px;font-size:12px;font-weight:1000}.presentation-tool-button.active kbd{background:rgba(255,255,255,.16);color:white}.presentation-clear-button{width:100%;margin-top:8px;border:1px solid #fecdd3;background:#fff1f2;color:#be123c}.tool-zoom-mode:not(.presentation-mode) main{zoom:1.25}.presentation-mode.tool-zoom-mode .stage.active-slide{zoom:1.25}
@@ -39,7 +39,7 @@ table{width:100%;border-collapse:collapse;background:#fff;min-width:760px} .tabl
 <span class="badge">📚 무료 플랜 · Windows Codex · 5.4-mini</span>
 <h1>독서커뮤니티 웹앱 개발<br>실습 자료</h1>
 <p>로컬 앱 → API → GitHub → Vercel → Supabase MCP → Kakao 로그인 순서로 진행합니다.</p>
-<div class="hero-actions"><button type="button" id="enterPresentation" class="presentation-toggle">전체화면 모드</button></div>
+<div class="hero-actions"><button type="button" id="enterPresentation" class="presentation-toggle">전체화면 모드</button><button type="button" id="downloadEditedHtml" class="download-edited-btn edit-only-btn">수정본 HTML 다운로드</button></div>
 </div>
 <a class="hero-visual" href="reading-community-app-preview.png" download="뿌뿌이미지.png" title="이미지 다운로드">
   <img src="reading-community-app-preview.png" alt="독서커뮤니티 앱 미리보기">
@@ -1241,8 +1241,63 @@ const setPromptText=(id,value)=>{
   const code=document.querySelector(`#${id} code`);
   if(code) code.textContent=value;
 };
+const savePromptText=(id,value)=>{
+  try{
+    localStorage.setItem(storageKey(id),value);
+    if(localStorage.getItem(storageKey(id))!==value) throw new Error('storage_mismatch');
+    setPromptText(id,value);
+    return true;
+  }catch(error){
+    console.warn('Prompt save failed',error);
+    showToast('저장 실패: 브라우저 저장 공간을 확인하세요.');
+    return false;
+  }
+};
+const getCurrentPromptText=id=>{
+  const pre=document.getElementById(id);
+  const prompt=pre?.closest('.prompt');
+  const editor=prompt?.querySelector('.prompt-editor');
+  return editor ? editor.value : getPromptText(id);
+};
+const serializeEditedHtml=()=>{
+  const clone=document.documentElement.cloneNode(true);
+  const cloneBody=clone.querySelector('body');
+  cloneBody?.classList.remove('editing-enabled','presentation-mode','tool-zoom-mode');
+  clone.querySelectorAll('.prompt-editor,.save-btn,.cancel-btn').forEach(element=>element.remove());
+  clone.querySelectorAll('pre[id]').forEach(pre=>{
+    const id=pre.id;
+    const code=pre.querySelector('code');
+    if(code) code.textContent=getCurrentPromptText(id);
+    pre.removeAttribute('style');
+  });
+  clone.querySelectorAll('[data-edit]').forEach(button=>{
+    button.disabled=true;
+    button.setAttribute('aria-hidden','true');
+    button.removeAttribute('style');
+  });
+  clone.querySelectorAll('.presentation-draw-layer svg').forEach(svg=>svg.replaceChildren());
+  clone.querySelectorAll('.presentation-toolbox,.presentation-tool-menu,.presentation-draw-layer,.presentation-pointer-dot,.teacher-admin,.teacher-badge').forEach(element=>{
+    element.setAttribute('hidden','');
+  });
+  return `<!doctype html>\n${clone.outerHTML}`;
+};
+const downloadEditedHtml=()=>{
+  const blob=new Blob([serializeEditedHtml()],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download='reading-community-codex-practice-5-4mini-edited.html';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast('수정본 HTML을 다운로드했습니다.');
+  return true;
+};
+window.edu2DownloadEditedPracticeHtml=downloadEditedHtml;
 const slides=Array.from(document.querySelectorAll('.stage'));
 const enterPresentationBtn=document.getElementById('enterPresentation');
+const downloadEditedHtmlBtn=document.getElementById('downloadEditedHtml');
 const presentationCounter=document.getElementById('presentationCounter');
 const presentationPrev=document.getElementById('presentationPrev');
 const presentationNext=document.getElementById('presentationNext');
@@ -1276,6 +1331,7 @@ const movePresentation=delta=>{
   updatePresentation();
 };
 enterPresentationBtn?.addEventListener('click',enterPresentation);
+downloadEditedHtmlBtn?.addEventListener('click',downloadEditedHtml);
 presentationPrev?.addEventListener('click',()=>movePresentation(-1));
 presentationNext?.addEventListener('click',()=>movePresentation(1));
 presentationExit?.addEventListener('click',exitPresentation);
@@ -1297,8 +1353,12 @@ document.querySelectorAll('[data-copy]').forEach(btn=>{
   actions.insertBefore(editBtn,btn);
 });
 document.querySelectorAll('pre[id]').forEach(pre=>{
-  const saved=localStorage.getItem(storageKey(pre.id));
-  if(saved!==null) setPromptText(pre.id,saved);
+  try{
+    const saved=localStorage.getItem(storageKey(pre.id));
+    if(saved!==null) setPromptText(pre.id,saved);
+  }catch(error){
+    console.warn('Prompt load failed',error);
+  }
 });
 document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',async()=>{
   const text=getPromptText(btn.dataset.copy);
@@ -1336,14 +1396,13 @@ document.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('clic
       showToast('관리자 모드에서만 저장할 수 있습니다.');
       return;
     }
-    setPromptText(id,textarea.value);
-    localStorage.setItem(storageKey(id),textarea.value);
+    if(!savePromptText(id,textarea.value)) return;
     textarea.remove();
     save.remove();
     cancel.remove();
     pre.style.display='';
     btn.style.display='';
-    showToast('수정한 프롬프트를 저장했습니다.');
+    showToast('프롬프트를 브라우저에 저장했습니다.');
   });
   cancel.addEventListener('click',()=>{
     textarea.remove();
